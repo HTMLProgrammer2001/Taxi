@@ -1,0 +1,21 @@
+[debug] [2020-01-21T09:14:32.718Z] ----------------------------------------------------------------------
+[debug] [2020-01-21T09:14:32.724Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Lenovo\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2020-01-21T09:14:32.724Z] CLI Version:   7.12.1
+[debug] [2020-01-21T09:14:32.724Z] Platform:      win32
+[debug] [2020-01-21T09:14:32.724Z] Node Version:  v10.16.3
+[debug] [2020-01-21T09:14:32.726Z] Time:          Tue Jan 21 2020 11:14:32 GMT+0200 (GMT+02:00)
+[debug] [2020-01-21T09:14:32.727Z] ----------------------------------------------------------------------
+[debug] [2020-01-21T09:14:32.727Z] 
+[debug] [2020-01-21T09:14:32.829Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2020-01-21T09:14:32.831Z] > authorizing via signed-in user
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  D:\OSPanel\OSPanel\domains\Taxi
+

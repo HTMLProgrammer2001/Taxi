@@ -1,27 +1,41 @@
-import {BrowserRouter as Router, Route, Switch, Link} from 'react-router-dom';
+//Pages and styles
+import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import 'scss/style.scss';
+import 'pages/index.jade';
 
-import "pages/index.jade";
-import "css/style.css";
-import "less/test.less";
+//Modules
+import {BrowserRouter as Router, Route} from 'react-router-dom';
+import ReactDOM from 'react-dom';
+import firebase from 'firebase';
 
-class Test extends React.Component{
-    render(){
-        console.log(this.props);
+//myComponents
+import Forms from './Components/Forms/';
+import Profile from './Components/Profile';
+import Map from './Components/Map/';
+import Dashboard from './Components/Dashboard';
 
-        return <div>Render</div>
-    }
-}
+//config
+import fireBaseConfig from './fareConfig';
+
+window.firebaseProj = firebase.initializeApp(fireBaseConfig);
 
 ReactDOM.render(
     <Router>
         <Route exact path = "/">
-            <div>Hi</div>
-            <Link to={"/test"}>
-                Re
-            </Link>
+            <Forms/>
         </Route>
 
-        <Route path = "/test" component = {Test}/>
+        <Route path = "/profile">
+            <Profile/>
+        </Route>
+
+        <Route path = "/map">
+            <Map/>
+        </Route>
+
+        <Route path = "/dashboard">
+            <Dashboard/>
+        </Route>
     </Router>,
     document.querySelector('#main')
 );
