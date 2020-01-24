@@ -8,7 +8,6 @@ class MapController{
 
         this.orders = [];
         this.auto = [];
-        this.paths = [];
 
         this.icons = {
             car: {
@@ -22,6 +21,63 @@ class MapController{
         }
     }
 
+    animateMove(){
+        this.auto.forEach( (car) => {
+           if(!car.inMove)
+               return;
+
+           let steps = car.response.routes[0].legs[0].steps;
+
+           if(!steps.length){
+               car.inMove = false;
+               car.marker.setMap(null);
+
+               let adoptOrder = this.orders.find( (order) => {
+                   return order.orderID == car.orderID;
+               });
+
+               if(adoptOrder)
+                   adoptOrder.marker.setMap(null);
+           }
+
+            let autoCoord = car.coords,
+                nextStep = steps[0].end_point,
+                speed = 0.01,
+
+                distance = Math.sqrt((autoCoord.lat - nextStep.lat())**2 + (autoCoord.lng - nextStep.lng())**2);
+
+            if(distance < speed){
+                car.marker.setPosition({
+                    lat: nextStep.lat(),
+                    lng: nextStep.lng()
+                });
+
+                car.coords = {
+                    lat: nextStep.lat(),
+                    lng: nextStep.lng()
+                };
+
+                steps.shift();
+            }
+            else{
+                let angle = Math.atan2(autoCoord.lng - nextStep.lng(), autoCoord.lat - nextStep.lat());
+                angle += Math.PI;
+
+                car.marker.setPosition({
+                    lat: autoCoord.lat + Math.cos(angle) * speed,
+                    lng: autoCoord.lng + Math.sin(angle) * speed
+                });
+
+                car.coords = {
+                    lat: autoCoord.lat + Math.cos(angle) * speed,
+                    lng: autoCoord.lng + Math.sin(angle) * speed
+                };
+            }
+
+            car.path.directionRenderer.setDirections(car.response);
+        });
+    }
+
     createMap(mapElement) {
         navigator.geolocation.getCurrentPosition((res) => {
             //create map with centre in the current user position
@@ -31,6 +87,8 @@ class MapController{
                 mapTypeControl: false
             });
         });
+
+        setInterval(this.animateMove.bind(this), 5000);
     }
 
     createOrder(orderInfo){
@@ -91,14 +149,20 @@ class MapController{
             travelMode: 'DRIVING'
         }, function(response, status) {
             if (status === 'OK') {
-                //all right. Save and render path
+                //change auto
+                auto.inMove = true;
+                auto.response = response;
+
                 pathObj.directionRenderer.setDirections(response);
+
+                window.response = response;
+                window.path = pathObj;
             } else {
                 window.alert('Directions request failed due to ' + status);
             }
         });
 
-        this.paths.push(pathObj);
+        auto.path = pathObj;
     }
 
     createMarker(coords, icon){
@@ -109,40 +173,18 @@ class MapController{
         });
     }
 
-    orderMarkerListener(orderInfo){
-        if (!this.selectedAuto) {
-            orderInfo.messageWindow.open(this.map, orderInfo.marker);
-        }
-        else{
-            if(orderInfo.status != 'Free') {
-                alert('Невозможно выбрать заказ который уже принят!');
-            }
-            else {
-                //change icons on markers
-                this.selectedAuto.marker.setIcon(this.icons.car.busy);
-                orderInfo.marker.setIcon(this.icons.order.busy);
-
-                //change auto properties
-                this.selectedAuto.orderID = orderInfo.orderID;
-                this.selectedAuto.messageWindow.setContent(this.createContentForAuto(this.selectedAuto));
-                this.selectedAuto.messageWindow.close();
-
-                this.createPath(this.selectedAuto);
-
-                this.selectedAuto = null;
-            }
-        }
-    }
-
     createContentForAuto(auto){
 
-        window.onTravelButClick = () => {
-            this.selectedAuto = auto;
+        //button click handler
+        window.onTravelButClick = (event) => {
+            this.selectedAuto = this.auto.find( (elem) => {
+                return elem.nomer == event.target.dataset.nomer;
+            });
 
-            auto.messageWindow.setContent('<div>Выберите заказ</div>');
+            this.selectedAuto.messageWindow.setContent('<div>Выберите заказ</div>');
         };
 
-        let GoButton = !auto.orderID ? `<div onclick = "onTravelButClick()" class='btn btn-link'>В путь</div>` : ``;
+        let GoButton = !auto.orderID ? `<div onclick = "onTravelButClick(event)" class='btn btn-link' data-nomer = ${auto.nomer}>В путь</div>` : ``;
 
         return `
         <div class = "justify-content-center">
@@ -171,6 +213,38 @@ class MapController{
             this.createAuto(auto);
         });
     }
+
+    orderMarkerListener(orderInfo){
+        if (!this.selectedAuto) {
+            orderInfo.messageWindow.open(this.map, orderInfo.marker);
+        }
+        else{
+            if(orderInfo.status != 'Free') {
+                alert('Невозможно выбрать заказ который уже принят!');
+            }
+            else {
+                //change icons on markers
+                this.selectedAuto.marker.setIcon(this.icons.car.busy);
+                orderInfo.marker.setIcon(this.icons.order.busy);
+
+                //change order properties
+                orderInfo.status = 'Adopted';
+                orderInfo.messageWindow.setContent(this.createContentForOrder(orderInfo));
+
+                //change auto properties
+                this.selectedAuto.inMove = true;
+                this.selectedAuto.orderID = orderInfo.orderID;
+                this.selectedAuto.status = 'Busy';
+                this.selectedAuto.messageWindow.setContent(this.createContentForAuto(this.selectedAuto));
+                this.selectedAuto.messageWindow.close();
+
+                this.createPath(this.selectedAuto);
+
+                this.selectedAuto = null;
+            }
+        }
+    }
+
 }
 
 export default MapController;
