@@ -31,8 +31,8 @@ class Dashboard extends React.Component{
     }
 
     render(){
-        if(!firebaseProj.auth().currentUser)
-            return <Redirect to = "/"/>
+        // if(!firebaseProj.auth().currentUser)
+        //     return <Redirect to = "/"/>
 
         return (
             <React.Fragment>
