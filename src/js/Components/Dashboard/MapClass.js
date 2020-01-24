@@ -26,9 +26,10 @@ class MapController{
            if(!car.inMove)
                return;
 
-           let steps = car.response.routes[0].legs[0].steps;
+           let autoCoord = car.coords;
 
-           if(!steps.length){
+           if(!car.steps.length){
+
                car.inMove = false;
                car.marker.setMap(null);
 
@@ -40,41 +41,51 @@ class MapController{
                    adoptOrder.marker.setMap(null);
            }
 
-            let autoCoord = car.coords,
-                nextStep = steps[0].end_point,
-                speed = 0.01,
+           let speed = 0.001,
+               newCoord = {lat: autoCoord.lat, lng: autoCoord.lng};
 
-                distance = Math.sqrt((autoCoord.lat - nextStep.lat())**2 + (autoCoord.lng - nextStep.lng())**2);
+           while(speed > 0){
+               let nextStep = car.steps[0].end_point,
+                   distance = Math.sqrt((autoCoord.lat - nextStep.lat())**2 + (autoCoord.lng - nextStep.lng())**2);
 
-            if(distance < speed){
-                car.marker.setPosition({
-                    lat: nextStep.lat(),
-                    lng: nextStep.lng()
-                });
+               if(distance > speed){
+                   let angle = Math.atan2(autoCoord.lng - nextStep.lng(), autoCoord.lat - nextStep.lat());
+                   angle += Math.PI;
 
-                car.coords = {
-                    lat: nextStep.lat(),
-                    lng: nextStep.lng()
-                };
+                   newCoord = {
+                       lat: autoCoord.lat + Math.cos(angle) * speed,
+                       lng: autoCoord.lng + Math.sin(angle) * speed
+                   };
 
-                steps.shift();
-            }
-            else{
-                let angle = Math.atan2(autoCoord.lng - nextStep.lng(), autoCoord.lat - nextStep.lat());
-                angle += Math.PI;
+                   speed = 0;
+               }
+               else{
+                   newCoord = {
+                       lat: nextStep.lat(),
+                       lng: nextStep.lng()
+                   };
 
-                car.marker.setPosition({
-                    lat: autoCoord.lat + Math.cos(angle) * speed,
-                    lng: autoCoord.lng + Math.sin(angle) * speed
-                });
+                   speed -= distance;
+               }
+           }
 
-                car.coords = {
-                    lat: autoCoord.lat + Math.cos(angle) * speed,
-                    lng: autoCoord.lng + Math.sin(angle) * speed
-                };
-            }
+            car.marker.setPosition(newCoord);
+            car.coords = newCoord;
 
-            car.path.directionRenderer.setDirections(car.response);
+            car.path.directionServ.route({
+                origin: car.coords,
+                destination: car.path.dest,
+                travelMode: 'DRIVING'
+            }, function(response, status) {
+                if (status === 'OK') {
+                    //change auto
+                    car.steps = response.routes[0].legs[0].steps;
+
+                    car.path.directionRenderer.setDirections(response);
+                } else {
+                    window.alert('Directions request failed due to ' + status);
+                }
+            });
         });
     }
 
@@ -88,7 +99,7 @@ class MapController{
             });
         });
 
-        setInterval(this.animateMove.bind(this), 5000);
+        setInterval(this.animateMove.bind(this), 2000);
     }
 
     createOrder(orderInfo){
@@ -132,13 +143,10 @@ class MapController{
         //find destination order
         let destOrder = this.orders.find( (e) => {
             return e.orderID == auto.orderID;
-        });
+        }),
 
         //create  path
-            let pathObj = {
-                auto,
-                order: destOrder
-            };
+        pathObj = {dest: destOrder.coords};
 
         pathObj.directionServ = new this.googleMaps.DirectionsService;
         pathObj.directionRenderer = new this.googleMaps.DirectionsRenderer({map: this.map, suppressMarkers: true});
@@ -151,12 +159,9 @@ class MapController{
             if (status === 'OK') {
                 //change auto
                 auto.inMove = true;
-                auto.response = response;
+                auto.steps = response.routes[0].legs[0].steps;
 
                 pathObj.directionRenderer.setDirections(response);
-
-                window.response = response;
-                window.path = pathObj;
             } else {
                 window.alert('Directions request failed due to ' + status);
             }
