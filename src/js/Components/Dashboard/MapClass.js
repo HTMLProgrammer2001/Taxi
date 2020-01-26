@@ -49,13 +49,22 @@ class MapController{
                    distance = Math.sqrt((autoCoord.lat - nextStep.lat())**2 + (autoCoord.lng - nextStep.lng())**2);
 
                if(distance > speed){
-                   let angle = Math.atan2(autoCoord.lng - nextStep.lng(), autoCoord.lat - nextStep.lat());
-                   angle += Math.PI;
+                   newCoord = nextStep;
 
-                   newCoord = {
-                       lat: autoCoord.lat + Math.cos(angle) * speed,
-                       lng: autoCoord.lng + Math.sin(angle) * speed
-                   };
+                   //check all paths in this step
+                   for(let i = 0; i < car.steps[0].path.length; i++){
+                       let point = car.steps[0].path[i],
+                           pointDistance = Math.sqrt((autoCoord.lat - point.lat())**2 + (autoCoord.lng - point.lng())**2);
+
+                       if(pointDistance > speed){
+                           newCoord = {
+                               lat: car.steps[0].path[i].lat(),
+                               lng: car.steps[0].path[i].lng()
+                           };
+
+                           break;
+                       }
+                   }
 
                    speed = 0;
                }
@@ -66,6 +75,8 @@ class MapController{
                    };
 
                    speed -= distance;
+
+                   car.steps.shift();
                }
            }
 
@@ -94,7 +105,7 @@ class MapController{
             //create map with centre in the current user position
             this.map = new this.googleMaps.Map(mapElement, {
                 center: { lat: res.coords.latitude, lng: res.coords.longitude },
-                zoom: 10,
+                zoom: 15,
                 mapTypeControl: false
             });
         });
@@ -164,6 +175,8 @@ class MapController{
                 //change auto
                 auto.inMove = true;
                 auto.steps = response.routes[0].legs[0].steps;
+
+                console.log(response.routes[0].legs[0]);
 
                 pathObj.directionRenderer.setDirections(response);
             } else {
