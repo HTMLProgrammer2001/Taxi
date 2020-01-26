@@ -28,7 +28,7 @@ class MapController{
 
            let autoCoord = car.coords;
 
-           if(!car.steps.length){
+           if(!car.steps.length || !car.steps[0].distance.value){
 
                car.inMove = false;
                car.marker.setMap(null);
@@ -149,7 +149,11 @@ class MapController{
         pathObj = {dest: destOrder.coords};
 
         pathObj.directionServ = new this.googleMaps.DirectionsService;
-        pathObj.directionRenderer = new this.googleMaps.DirectionsRenderer({map: this.map, suppressMarkers: true});
+        pathObj.directionRenderer = new this.googleMaps.DirectionsRenderer({
+            map: this.map,
+            suppressMarkers: true,
+            preserveViewport: true
+        });
 
         pathObj.directionServ.route({
             origin: auto.coords,
