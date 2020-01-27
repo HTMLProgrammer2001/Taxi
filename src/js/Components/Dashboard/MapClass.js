@@ -1,3 +1,5 @@
+const COST_PER_KM = 10;
+
 class MapController{
 
     constructor(googleMaps){
@@ -28,14 +30,15 @@ class MapController{
            if(!car.inMove)
                return;
 
-           let autoCoord = car.coords;
+           let autoCoord = car.coords,
+
+            //find order
+            curOrder = this.orders.find( (order) => {
+                return order.orderID == car.orderID;
+            });
 
            //arrived
-           if((!car.steps.length || !car.steps[0].distance.value) && car.path.loaded){
-               //find order
-               let curOrder = this.orders.find( (order) => {
-                   return order.orderID == car.orderID;
-               });
+           if((!car.path.steps.length || !car.path.steps[0].distance.value) && car.path.loaded){
 
                //if we arrived to order
                if(curOrder.status == 'Wait'){
@@ -57,34 +60,36 @@ class MapController{
                    car.inMove = false;
 
                    curOrder.status = 'Pay';
+                   car.status = 'Pay';
+                   curOrder.marker.setMap(null);
 
                    return;
                }
            }
 
-           let speed = 0.1,
+           let speed = 0.01,
                newCoord = {lat: autoCoord.lat, lng: autoCoord.lng};
 
            while(speed > 0){
 
-               if(!car.steps.length)
+               if(!car.path.steps.length)
                    break;
 
-               let nextStep = car.steps[0].end_point,
+               let nextStep = car.path.steps[0].end_point,
                    distance = Math.sqrt((autoCoord.lat - nextStep.lat())**2 + (autoCoord.lng - nextStep.lng())**2);
 
                if(distance > speed){
                    newCoord = nextStep;
 
                    //check all paths in this step
-                   for(let i = 0; i < car.steps[0].path.length; i++){
-                       let point = car.steps[0].path[i],
+                   for(let i = 0; i < car.path.steps[0].path.length; i++){
+                       let point = car.path.steps[0].path[i],
                            pointDistance = Math.sqrt((autoCoord.lat - point.lat())**2 + (autoCoord.lng - point.lng())**2);
 
                        if(pointDistance > speed){
                            newCoord = {
-                               lat: car.steps[0].path[i].lat(),
-                               lng: car.steps[0].path[i].lng()
+                               lat: car.path.steps[0].path[i].lat(),
+                               lng: car.path.steps[0].path[i].lng()
                            };
 
                            break;
@@ -101,9 +106,15 @@ class MapController{
 
                    speed -= distance;
 
-                   car.steps.shift();
+                   car.path.steps.shift();
                }
            }
+
+           if(curOrder.status == 'Move')
+                car.path.distance += this.googleMaps.geometry.spherical.computeDistanceBetween(
+                    new this.googleMaps.LatLng(car.coords.lat, car.coords.lng),
+                    new this.googleMaps.LatLng(newCoord.lat, newCoord.lng)
+                )/1000;
 
             car.marker.setPosition(newCoord);
             car.coords = newCoord;
@@ -116,18 +127,18 @@ class MapController{
                 if (status === 'OK') {
                     //change auto
 
-                    car.steps = response.routes[0].legs[0].steps;
-
-                    console.log(car.steps);
+                    car.path.steps = response.routes[0].legs[0].steps;
 
                     car.path.directionRenderer.setDirections(response);
 
-                    if(car.steps[0].distance.value)
+                    if(car.path.steps[0].distance.value)
                         car.path.loaded = true;
                 } else {
                     alert('Directions request failed due to ' + status);
                 }
             });
+
+            car.messageWindow.setContent(this.createContentForAuto(car));
         });
     }
 
@@ -209,8 +220,9 @@ class MapController{
         }, function(response, status) {
             if (status === 'OK') {
                 //change auto
+                auto.path.distance = 0;
                 auto.inMove = true;
-                auto.steps = response.routes[0].legs[0].steps;
+                auto.path.steps = response.routes[0].legs[0].steps;
                 auto.path.loaded = true;
 
                 curOrder.status = 'Wait';
@@ -234,25 +246,47 @@ class MapController{
 
     createContentForAuto(auto){
 
+        let content = '';
+
         //button start travel handler
-        window.onAutoButClick = (event) => {
-            if(this.selectedAuto && this.selectedAuto.nomer == event.target.dataset.nomer){
-                this.selectedAuto = null;
-                return;
+        window.onAutoButClick = (event, type) => {
+            if(type == 'inTravel') {
+                if (this.selectedAuto && this.selectedAuto.nomer == event.target.dataset.nomer) {
+                    this.selectedAuto = null;
+                    return;
+                }
+
+                this.selectedAuto = this.auto.find((elem) => {
+                    return elem.nomer == event.target.dataset.nomer;
+                });
+
+                this.selectedAuto.messageWindow.setContent('<div>Выберите заказ</div>');
             }
+            else{
+                let auto = this.auto.find((elem) => {
+                    return elem.nomer == event.target.dataset.nomer;
+                });
 
-            this.selectedAuto = this.auto.find( (elem) => {
-                return elem.nomer == event.target.dataset.nomer;
-            });
+                auto.orderID = null;
+                auto.inMove = false;
+                auto.status = 'Free';
+                auto.path = {};
 
-            this.selectedAuto.messageWindow.setContent('<div>Выберите заказ</div>');
+                auto.marker.setIcon(this.icons.car.free);
+
+                auto.messageWindow.close();
+            }
         };
 
-        let content = !auto.orderID ?
-            `<div onclick = "onAutoButClick(event)" class='btn btn-link' data-nomer = ${auto.nomer}>В путь</div>`
-                :
-            `<div>Номер заказа: ${auto.orderID}</div>
-            `;
+        if(!auto.orderID)
+            content = `<div onclick = "onAutoButClick(event, 'inTravel')" class='btn btn-link' data-nomer = ${auto.nomer}>В путь</div>`;
+        else {
+            content = `<div>Номер заказа: ${auto.orderID}</div>
+                <div>Проехано на: ${new Number((auto.path && auto.path.distance) * COST_PER_KM).toFixed(2)} грн.</div>`;
+
+            if(auto.status == 'Pay')
+                content += `<div onclick = "onAutoButClick(event, 'pay')" class = 'btn btn-link' data-nomer = ${auto.nomer}>Оплачено</div>`
+        }
 
         return `
         <div class = "justify-content-center">
