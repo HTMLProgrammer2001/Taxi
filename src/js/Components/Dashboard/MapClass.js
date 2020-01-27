@@ -3,6 +3,7 @@ class MapController{
     constructor(googleMaps){
         this.map = null;
         this.googleMaps = googleMaps;
+        this.geodecoder = new googleMaps.Geocoder();
 
         this.selectedAuto = null;
 
@@ -16,7 +17,8 @@ class MapController{
             },
             order: {
                 free: require('assets/peopleFree.png'),
-                busy: require('assets/peopleBusy.png')
+                inWait: require('assets/peopleBusy.png'),
+                inMove: require('assets/target.png')
             }
         }
     }
@@ -28,23 +30,46 @@ class MapController{
 
            let autoCoord = car.coords;
 
-           if(!car.steps.length || !car.steps[0].distance.value){
-
-               car.inMove = false;
-               car.marker.setMap(null);
-
-               let adoptOrder = this.orders.find( (order) => {
+           //arrived
+           if((!car.steps.length || !car.steps[0].distance.value) && car.path.loaded){
+               //find order
+               let curOrder = this.orders.find( (order) => {
                    return order.orderID == car.orderID;
                });
 
-               if(adoptOrder)
-                   adoptOrder.marker.setMap(null);
+               //if we arrived to order
+               if(curOrder.status == 'wait'){
+                   curOrder.status = 'move';
+
+                   this.geodecoder.geocode({address: curOrder.destination}, (res, status) => {
+                       if(status == 'OK'){
+                           curOrder.marker.setPosition(res[0].geometry.location);
+                           curOrder.marker.setIcon(this.icons.order.inMove);
+
+                           car.path.dest = res[0].geometry.location;
+                           car.path.loaded = false;
+                       }
+                       else
+                           alert('Error in geocoding');
+                   });
+               }
+               else if(curOrder.status == 'move'){
+                   car.inMove = false;
+
+                   curOrder.status = 'Pay';
+
+                   return;
+               }
            }
 
-           let speed = 0.001,
+           let speed = 0.1,
                newCoord = {lat: autoCoord.lat, lng: autoCoord.lng};
 
            while(speed > 0){
+
+               if(!car.steps.length)
+                   break;
+
                let nextStep = car.steps[0].end_point,
                    distance = Math.sqrt((autoCoord.lat - nextStep.lat())**2 + (autoCoord.lng - nextStep.lng())**2);
 
@@ -90,11 +115,16 @@ class MapController{
             }, function(response, status) {
                 if (status === 'OK') {
                     //change auto
+
                     car.steps = response.routes[0].legs[0].steps;
 
                     car.path.directionRenderer.setDirections(response);
+                    car.path.loaded = true;
+
+                    if(!car.steps[0].distance)
+                        car.path.loaded = false;
                 } else {
-                    window.alert('Directions request failed due to ' + status);
+                    alert('Directions request failed due to ' + status);
                 }
             });
         });
@@ -114,14 +144,21 @@ class MapController{
     }
 
     createOrder(orderInfo){
-        let icon = orderInfo.status == 'Free' ? this.icons.order.free : this.icons.order.busy;
+        this.geodecoder.geocode({address: orderInfo.start}, (result, status) => {
 
-        orderInfo.marker = this.createMarker(orderInfo.coords, icon);
-        orderInfo.messageWindow = this.createWindow(this.createContentForOrder(orderInfo));
+            if(status == 'OK'){
+                //select icon
+                let icon = orderInfo.status == 'Free' ? this.icons.order.free : this.icons.order.busy;
+                //create data for order
+                orderInfo.coords = result[0].geometry.location;
+                orderInfo.marker = this.createMarker(orderInfo.coords, icon);
+                orderInfo.messageWindow = this.createWindow(this.createContentForOrder(orderInfo));
 
-        orderInfo.marker.addListener('click', this.orderMarkerListener.bind(this, orderInfo));
+                orderInfo.marker.addListener('click', this.orderMarkerListener.bind(this, orderInfo));
 
-        this.orders.push(orderInfo);
+                this.orders.push(orderInfo);
+            }
+        });
     }
 
     createAuto(autoInfo){
@@ -133,9 +170,7 @@ class MapController{
         autoInfo.messageWindow = this.createWindow(this.createContentForAuto(autoInfo));
 
         //show message window
-        autoInfo.marker.addListener('click', () => {
-           autoInfo.messageWindow.open(this.map, autoInfo.marker);
-        });
+        autoInfo.marker.addListener('click', this.autoMarkerClick.bind(this, autoInfo));
 
         if(autoInfo.orderID)
             this.createPath(autoInfo);
@@ -152,12 +187,12 @@ class MapController{
 
     createPath(auto){
         //find destination order
-        let destOrder = this.orders.find( (e) => {
+        let curOrder = this.orders.find( (e) => {
             return e.orderID == auto.orderID;
         }),
 
         //create  path
-        pathObj = {dest: destOrder.coords};
+        pathObj = {dest: curOrder.coords};
 
         pathObj.directionServ = new this.googleMaps.DirectionsService;
         pathObj.directionRenderer = new this.googleMaps.DirectionsRenderer({
@@ -168,19 +203,20 @@ class MapController{
 
         pathObj.directionServ.route({
             origin: auto.coords,
-            destination: destOrder.coords,
+            destination: curOrder.coords,
             travelMode: 'DRIVING'
         }, function(response, status) {
             if (status === 'OK') {
                 //change auto
                 auto.inMove = true;
                 auto.steps = response.routes[0].legs[0].steps;
+                auto.path.loaded = true;
 
-                console.log(response.routes[0].legs[0]);
+                curOrder.status = 'wait';
 
                 pathObj.directionRenderer.setDirections(response);
             } else {
-                window.alert('Directions request failed due to ' + status);
+                alert('Directions request failed due to ' + status);
             }
         });
 
@@ -197,8 +233,13 @@ class MapController{
 
     createContentForAuto(auto){
 
-        //button click handler
-        window.onTravelButClick = (event) => {
+        //button start travel handler
+        window.onAutoButClick = (event) => {
+            if(this.selectedAuto && this.selectedAuto.nomer == event.target.dataset.nomer){
+                this.selectedAuto = null;
+                return;
+            }
+
             this.selectedAuto = this.auto.find( (elem) => {
                 return elem.nomer == event.target.dataset.nomer;
             });
@@ -206,23 +247,30 @@ class MapController{
             this.selectedAuto.messageWindow.setContent('<div>Выберите заказ</div>');
         };
 
-        let GoButton = !auto.orderID ? `<div onclick = "onTravelButClick(event)" class='btn btn-link' data-nomer = ${auto.nomer}>В путь</div>` : ``;
+        let content = !auto.orderID ?
+            `<div onclick = "onAutoButClick(event)" class='btn btn-link' data-nomer = ${auto.nomer}>В путь</div>`
+                :
+            `<div>Номер заказа: ${auto.orderID}</div>
+            `;
 
         return `
         <div class = "justify-content-center">
             <div>Номер машины: ${auto.nomer}</div>
             <div>Статус: ${auto.status}</div>
-            ${GoButton}
+            ${content}
         </div>`;
     }
 
     createContentForOrder(info){
         return `
         <div class = "justify-content-center">
+            <div>Номер заказа: ${info.orderID}</div>
             <div>Телефон: ${info.phone}</div>
-            <div>Цена: ${info.price}</div>
-            <div>Время ожидания: ${info.waitTime} минут</div>
-            <div>Статус: ${info.status}</div>
+            <div>Пункт назначения: ${info.destination}</div>`
+            +
+                (info.status == 'Free' ? `<div>Время ожидания: ${Math.ceil((new Date() - info.orderCreate)/60000)} минут</div>` : '')
+            +
+            `<div>Статус: ${info.status}</div>
         </div>`;
     }
 
@@ -238,6 +286,7 @@ class MapController{
 
     orderMarkerListener(orderInfo){
         if (!this.selectedAuto) {
+            orderInfo.messageWindow.setContent(this.createContentForOrder(orderInfo));
             orderInfo.messageWindow.open(this.map, orderInfo.marker);
         }
         else{
@@ -247,7 +296,7 @@ class MapController{
             else {
                 //change icons on markers
                 this.selectedAuto.marker.setIcon(this.icons.car.busy);
-                orderInfo.marker.setIcon(this.icons.order.busy);
+                orderInfo.marker.setIcon(this.icons.order.inWait);
 
                 //change order properties
                 orderInfo.status = 'Adopted';
@@ -265,6 +314,16 @@ class MapController{
                 this.selectedAuto = null;
             }
         }
+    }
+
+    autoMarkerClick(autoInfo){
+        if(this.selectedAuto){
+            alert('Выберите заказ или отмените выбор заказа');
+            return;
+        }
+
+        autoInfo.messageWindow.setContent(this.createContentForAuto(autoInfo));
+        autoInfo.messageWindow.open(this.map, autoInfo.marker);
     }
 
 }
