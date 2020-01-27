@@ -38,8 +38,8 @@ class MapController{
                });
 
                //if we arrived to order
-               if(curOrder.status == 'wait'){
-                   curOrder.status = 'move';
+               if(curOrder.status == 'Wait'){
+                   curOrder.status = 'Move';
 
                    this.geodecoder.geocode({address: curOrder.destination}, (res, status) => {
                        if(status == 'OK'){
@@ -53,7 +53,7 @@ class MapController{
                            alert('Error in geocoding');
                    });
                }
-               else if(curOrder.status == 'move'){
+               else if(curOrder.status == 'Move'){
                    car.inMove = false;
 
                    curOrder.status = 'Pay';
@@ -118,11 +118,12 @@ class MapController{
 
                     car.steps = response.routes[0].legs[0].steps;
 
-                    car.path.directionRenderer.setDirections(response);
-                    car.path.loaded = true;
+                    console.log(car.steps);
 
-                    if(!car.steps[0].distance)
-                        car.path.loaded = false;
+                    car.path.directionRenderer.setDirections(response);
+
+                    if(car.steps[0].distance.value)
+                        car.path.loaded = true;
                 } else {
                     alert('Directions request failed due to ' + status);
                 }
@@ -212,7 +213,7 @@ class MapController{
                 auto.steps = response.routes[0].legs[0].steps;
                 auto.path.loaded = true;
 
-                curOrder.status = 'wait';
+                curOrder.status = 'Wait';
 
                 pathObj.directionRenderer.setDirections(response);
             } else {
