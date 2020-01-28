@@ -1,4 +1,7 @@
-const COST_PER_KM = 10;
+import * as stat from './const';
+import COST_PER_KM from './const';
+
+require("babel-polyfill");
 
 class MapController{
 
@@ -6,6 +9,9 @@ class MapController{
         this.map = null;
         this.googleMaps = googleMaps;
         this.geodecoder = new googleMaps.Geocoder();
+
+        this.database = firebaseProj.database();
+        this.dbInfo = this.database.ref('/');
 
         this.selectedAuto = null;
 
@@ -15,6 +21,7 @@ class MapController{
         this.icons = {
             car: {
                 free: require('assets/carFree.png'),
+                wait: require('assets/carWait.png'),
                 busy: require('assets/carBusy.png')
             },
             order: {
@@ -30,45 +37,40 @@ class MapController{
            if(!car.inMove)
                return;
 
-           let autoCoord = car.coords,
+           let autoCoords = car.coords,
 
             //find order
             curOrder = this.orders.find( (order) => {
-                return order.orderID == car.orderID;
+                return order.orderID === car.orderID;
             });
 
            //arrived
            if((!car.path.steps.length || !car.path.steps[0].distance.value) && car.path.loaded){
 
                //if we arrived to order
-               if(curOrder.status == 'Wait'){
-                   curOrder.status = 'Move';
+               if(curOrder.status === stat.ORDER_WAIT){
 
-                   this.geodecoder.geocode({address: curOrder.destination}, (res, status) => {
-                       if(status == 'OK'){
-                           curOrder.marker.setPosition(res[0].geometry.location);
-                           curOrder.marker.setIcon(this.icons.order.inMove);
+                   car.status = stat.AUTO_WAIT;
+                   car.marker.setIcon(this.icons.car.wait);
 
-                           car.path.dest = res[0].geometry.location;
-                           car.path.loaded = false;
-                       }
-                       else
-                           alert('Error in geocoding');
-                   });
+                   curOrder.status = stat.ORDER_AUTO;
+                   curOrder.marker.setMap(null);
                }
-               else if(curOrder.status == 'Move'){
+               else if(curOrder.status === stat.ORDER_MOVE){
                    car.inMove = false;
 
-                   curOrder.status = 'Pay';
-                   car.status = 'Pay';
+                   curOrder.status = stat.ORDER_PAY;
+                   car.status = stat.AUTO_PAY;
+
                    curOrder.marker.setMap(null);
+                   car.marker.setIcon(this.icons.car.wait);
 
                    return;
                }
            }
 
            let speed = 0.01,
-               newCoord = {lat: autoCoord.lat, lng: autoCoord.lng};
+               newCoords = {lat: autoCoords.lat, lng: autoCoords.lng};
 
            while(speed > 0){
 
@@ -76,18 +78,18 @@ class MapController{
                    break;
 
                let nextStep = car.path.steps[0].end_point,
-                   distance = Math.sqrt((autoCoord.lat - nextStep.lat())**2 + (autoCoord.lng - nextStep.lng())**2);
+                   distance = Math.sqrt((autoCoords.lat - nextStep.lat())**2 + (autoCoords.lng - nextStep.lng())**2);
 
                if(distance > speed){
-                   newCoord = nextStep;
+                   newCoords = nextStep;
 
                    //check all paths in this step
                    for(let i = 0; i < car.path.steps[0].path.length; i++){
                        let point = car.path.steps[0].path[i],
-                           pointDistance = Math.sqrt((autoCoord.lat - point.lat())**2 + (autoCoord.lng - point.lng())**2);
+                           pointDistance = Math.sqrt((autoCoords.lat - point.lat())**2 + (autoCoords.lng - point.lng())**2);
 
                        if(pointDistance > speed){
-                           newCoord = {
+                           newCoords = {
                                lat: car.path.steps[0].path[i].lat(),
                                lng: car.path.steps[0].path[i].lng()
                            };
@@ -99,7 +101,7 @@ class MapController{
                    speed = 0;
                }
                else{
-                   newCoord = {
+                   newCoords = {
                        lat: nextStep.lat(),
                        lng: nextStep.lng()
                    };
@@ -110,14 +112,14 @@ class MapController{
                }
            }
 
-           if(curOrder.status == 'Move')
+           if(curOrder.status === stat.ORDER_MOVE)
                 car.path.distance += this.googleMaps.geometry.spherical.computeDistanceBetween(
                     new this.googleMaps.LatLng(car.coords.lat, car.coords.lng),
-                    new this.googleMaps.LatLng(newCoord.lat, newCoord.lng)
+                    new this.googleMaps.LatLng(newCoords.lat, newCoords.lng)
                 )/1000;
 
-            car.marker.setPosition(newCoord);
-            car.coords = newCoord;
+            car.marker.setPosition(newCoords);
+            car.coords = newCoords;
 
             car.path.directionServ.route({
                 origin: car.coords,
@@ -133,9 +135,8 @@ class MapController{
 
                     if(car.path.steps[0].distance.value)
                         car.path.loaded = true;
-                } else {
+                } else
                     alert('Directions request failed due to ' + status);
-                }
             });
 
             car.messageWindow.setContent(this.createContentForAuto(car));
@@ -155,27 +156,43 @@ class MapController{
         setInterval(this.animateMove.bind(this), 2000);
     }
 
-    createOrder(orderInfo){
-        this.geodecoder.geocode({address: orderInfo.start}, (result, status) => {
+    async createOrder(orderInfo){
+        //if order finished or paying then don't show him
+        if([stat.ORDER_FINISHED, stat.ORDER_PAY].includes(orderInfo.status))
+            return;
 
-            if(status == 'OK'){
-                //select icon
-                let icon = orderInfo.status == 'Free' ? this.icons.order.free : this.icons.order.busy;
-                //create data for order
-                orderInfo.coords = result[0].geometry.location;
-                orderInfo.marker = this.createMarker(orderInfo.coords, icon);
-                orderInfo.messageWindow = this.createWindow(this.createContentForOrder(orderInfo));
+        //select icon and address
+        let icon = this.icons.order.free,
+            address = orderInfo.start;
 
-                orderInfo.marker.addListener('click', this.orderMarkerListener.bind(this, orderInfo));
+        if([stat.ORDER_WAIT, stat.ORDER_AUTO].includes(orderInfo.status))
+            icon = this.icons.order.inWait;
+        else if(orderInfo.status !== stat.ORDER_FREE){
+            icon = this.icons.order.inMove;
+            address = orderInfo.destination;
+        }
 
-                this.orders.push(orderInfo);
-            }
-        });
+        //transform address string to coords
+        let result = await this.geocode({address});
+
+        orderInfo.coords = result[0].geometry.location;
+        orderInfo.marker = this.createMarker(orderInfo.coords, icon);
+        orderInfo.messageWindow = this.createWindow(this.createContentForOrder(orderInfo));
+
+        orderInfo.marker.addListener('click', this.orderMarkerListener.bind(this, orderInfo));
+
+        this.orders.push(orderInfo);
     }
 
     createAuto(autoInfo){
         //select icon
-        let icon = autoInfo.status == 'Free' ? this.icons.car.free : this.icons.car.busy;
+        let icon = this.icons.car.free;
+
+        if([stat.AUTO_WAIT].includes(autoInfo.status))
+            icon = this.icons.car.wait;
+        else
+            if(autoInfo.status !== stat.AUTO_FREE)
+                icon = this.icons.car.busy;
 
         //create components
         autoInfo.marker = this.createMarker(autoInfo.coords, icon);
@@ -199,21 +216,22 @@ class MapController{
 
     createPath(auto){
         //find destination order
+        console.log(this.orders.length);
         let curOrder = this.orders.find( (e) => {
-            return e.orderID == auto.orderID;
+            return e.orderID === auto.orderID;
         }),
-
         //create  path
-        pathObj = {dest: curOrder.coords};
+        pathInfo = {dest: curOrder.coords};
 
-        pathObj.directionServ = new this.googleMaps.DirectionsService;
-        pathObj.directionRenderer = new this.googleMaps.DirectionsRenderer({
+        //rendering
+        pathInfo.directionServ = new this.googleMaps.DirectionsService;
+        pathInfo.directionRenderer = new this.googleMaps.DirectionsRenderer({
             map: this.map,
             suppressMarkers: true,
             preserveViewport: true
         });
 
-        pathObj.directionServ.route({
+        pathInfo.directionServ.route({
             origin: auto.coords,
             destination: curOrder.coords,
             travelMode: 'DRIVING'
@@ -225,15 +243,14 @@ class MapController{
                 auto.path.steps = response.routes[0].legs[0].steps;
                 auto.path.loaded = true;
 
-                curOrder.status = 'Wait';
+                curOrder.status = stat.ORDER_WAIT;
 
-                pathObj.directionRenderer.setDirections(response);
-            } else {
+                pathInfo.directionRenderer.setDirections(response);
+            } else
                 alert('Directions request failed due to ' + status);
-            }
         });
 
-        auto.path = pathObj;
+        auto.path = pathInfo;
     }
 
     createMarker(coords, icon){
@@ -249,43 +266,43 @@ class MapController{
         let content = '';
 
         //button start travel handler
-        window.onAutoButClick = (event, type) => {
-            if(type == 'inTravel') {
-                if (this.selectedAuto && this.selectedAuto.nomer == event.target.dataset.nomer) {
-                    this.selectedAuto = null;
-                    return;
-                }
+        window.onAutoButClick = (event) => {
 
-                this.selectedAuto = this.auto.find((elem) => {
-                    return elem.nomer == event.target.dataset.nomer;
+            let target = event.target,
+                type = target.dataset.type,
+                auto = this.auto.find((elem) => {
+                    return elem.nomer === event.target.dataset.nomer;
+                }),
+                order = this.orders.find( (elem) => {
+                   return elem.orderID === auto.orderID;
                 });
 
-                this.selectedAuto.messageWindow.setContent('<div>Выберите заказ</div>');
+            if(type === stat.EVENT_TRAVEL) {
+                this.eventTravelHandler();
             }
-            else{
-                let auto = this.auto.find((elem) => {
-                    return elem.nomer == event.target.dataset.nomer;
-                });
-
-                auto.orderID = null;
-                auto.inMove = false;
-                auto.status = 'Free';
-                auto.path = {};
-
-                auto.marker.setIcon(this.icons.car.free);
-
-                auto.messageWindow.close();
+            else if(type === stat.EVENT_WAIT){
+                this.eventWaitHandler(auto, order);
+            }
+            else if(type === stat.EVENT_PAY){
+                this.eventPayHandler(auto, order);
             }
         };
 
         if(!auto.orderID)
-            content = `<div onclick = "onAutoButClick(event, 'inTravel')" class='btn btn-link' data-nomer = ${auto.nomer}>В путь</div>`;
+            content = MapController.makeBut(stat.EVENT_TRAVEL, auto.nomer, 'В путь');
         else {
-            content = `<div>Номер заказа: ${auto.orderID}</div>
-                <div>Проехано на: ${new Number((auto.path && auto.path.distance) * COST_PER_KM).toFixed(2)} грн.</div>`;
+            let cost =((auto.path && auto.path.distance) * COST_PER_KM).toFixed(2);
 
-            if(auto.status == 'Pay')
-                content += `<div onclick = "onAutoButClick(event, 'pay')" class = 'btn btn-link' data-nomer = ${auto.nomer}>Оплачено</div>`
+            content = `<div>Номер заказа: ${auto.orderID}</div>`;
+
+            if(auto.status === stat.AUTO_MOVE || auto.status === stat.AUTO_PAY)
+                content += `<div>Проехано на: ${cost} грн.</div>`;
+
+            if(auto.status === stat.AUTO_WAIT)
+                content += MapController.makeBut(stat.EVENT_WAIT, auto.nomer,'Пассажир прибыл');
+
+            if(auto.status === stat.AUTO_PAY)
+                content += MapController.makeBut(stat.EVENT_PAY, auto.nomer, 'Оплачено');
         }
 
         return `
@@ -297,25 +314,81 @@ class MapController{
     }
 
     createContentForOrder(info){
-        return `
+
+        let waitTime = Math.ceil((new Date() - info.orderCreate)/60000),
+            content = ``;
+
+        content += `
         <div class = "justify-content-center">
             <div>Номер заказа: ${info.orderID}</div>
             <div>Телефон: ${info.phone}</div>
             <div>Пункт назначения: ${info.destination}</div>`
-            +
-                (info.status == 'Free' ? `<div>Время ожидания: ${Math.ceil((new Date() - info.orderCreate)/60000)} минут</div>` : '')
-            +
-            `<div>Статус: ${info.status}</div>
-        </div>`;
+
+        if(info.status === stat.ORDER_FREE)
+            content += `<div>Время ожидания: ${waitTime} минут</div>`;
+
+        content+= `<div>Статус: ${info.status}</div></div>`;
+
+
+        return content;
     }
 
-    loadData(data){
-        data.orders.forEach( (order) => {
-            this.createOrder(order);
+    eventTravelHandler(){
+        //abort selection
+        if (this.selectedAuto && this.selectedAuto.nomer === event.target.dataset.nomer) {
+            this.selectedAuto = null;
+            return;
+        }
+
+        //find auto
+        this.selectedAuto = this.auto.find((elem) => {
+            return elem.nomer === event.target.dataset.nomer;
         });
 
-        data.auto.forEach( (auto) => {
-            this.createAuto(auto);
+        this.selectedAuto.messageWindow.setContent('<div>Выберите заказ</div>');
+    }
+
+    eventPayHandler(auto, order){
+        auto.orderID = null;
+        auto.inMove = false;
+        auto.status = stat.AUTO_FREE;
+        auto.path = {};
+
+        auto.marker.setIcon(this.icons.car.free);
+
+        auto.messageWindow.close();
+    }
+
+    eventWaitHandler(auto, order){
+        auto.status = stat.AUTO_MOVE;
+        auto.marker.setIcon(this.icons.car.busy);
+
+        order.status = stat.ORDER_MOVE;
+
+        this.geocode({address: order.destination}).then( (res, status) => {
+            if(status === 'OK'){
+                order.marker.setPosition(res[0].geometry.location);
+                order.marker.setMap(this.map);
+                order.marker.setIcon(this.icons.order.inMove);
+
+                auto.path.dest = res[0].geometry.location;
+                auto.path.loaded = false;
+            }
+            else
+                alert('Error in geocoding');
+        });
+    }
+
+    async loadData(data){
+        for(let i = 0; i < data.orders.length; i++){
+            if(data.orders[i]){
+                await this.createOrder({orderID: i, ...data.orders[i]});
+            }
+        }
+
+        data.auto.forEach( (auto, autoID) => {
+            if(auto)
+                this.createAuto({autoID, ...auto});
         });
     }
 
@@ -325,28 +398,38 @@ class MapController{
             orderInfo.messageWindow.open(this.map, orderInfo.marker);
         }
         else{
-            if(orderInfo.status != 'Free') {
+            if(orderInfo.status !== stat.ORDER_FREE)
                 alert('Невозможно выбрать заказ который уже принят!');
-            }
             else {
                 //change icons on markers
                 this.selectedAuto.marker.setIcon(this.icons.car.busy);
                 orderInfo.marker.setIcon(this.icons.order.inWait);
 
                 //change order properties
-                orderInfo.status = 'Adopted';
+                orderInfo.status = stat.ORDER_WAIT;
                 orderInfo.messageWindow.setContent(this.createContentForOrder(orderInfo));
 
                 //change auto properties
                 this.selectedAuto.inMove = true;
                 this.selectedAuto.orderID = orderInfo.orderID;
-                this.selectedAuto.status = 'Busy';
+                this.selectedAuto.status = stat.AUTO_ORDER;
                 this.selectedAuto.messageWindow.setContent(this.createContentForAuto(this.selectedAuto));
                 this.selectedAuto.messageWindow.close();
 
-                this.createPath(this.selectedAuto);
+                //save database
+                this.dbInfo.child('orders/' + orderInfo.orderID).update({
+                    autoID: this.selectedAuto.autoID,
+                    status: stat.ORDER_WAIT
+                }).then( () =>
+                    this.dbInfo.child('auto/' + this.selectedAuto.autoID).update({
+                        orderID: orderInfo.orderID,
+                        status: stat.AUTO_ORDER
+                    })
+                ).then( () => {
+                    this.createPath(this.selectedAuto);
 
-                this.selectedAuto = null;
+                    this.selectedAuto = null;
+                });
             }
         }
     }
@@ -359,6 +442,33 @@ class MapController{
 
         autoInfo.messageWindow.setContent(this.createContentForAuto(autoInfo));
         autoInfo.messageWindow.open(this.map, autoInfo.marker);
+    }
+
+    //promisification of geocode
+    geocode(data){
+        return new Promise( (resolve, reject) => {
+           try{
+               this.geodecoder.geocode(data, (result, status) => {
+                   if(status != 'OK')
+                       reject(result);
+                   else
+                       resolve(result);
+               });
+           }
+           catch (e) {
+               reject(e);
+           }
+        });
+    }
+
+    static makeBut(type, nomer, text){
+        return `<div 
+                    onclick = "onAutoButClick(event)"
+                    class = 'btn btn-link'
+                    data-type = ${type} 
+                    data-nomer = ${nomer}>
+                        ${text}
+                    </div>`;
     }
 
 }

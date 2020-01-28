@@ -3,5 +3,6 @@
 		"env",
 		"stage-3",
 		"react"
-	]
+	],
+	"plugins": ["syntax-async-functions", "transform-regenerator"]
 }
