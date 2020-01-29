@@ -121,6 +121,13 @@ class MapController{
             car.marker.setPosition(newCoords);
             car.coords = newCoords;
 
+            //save auto changes
+            this.dbInfo.child('auto/' + car.autoID).update({
+                coords: car.coords,
+                distance: car.path.distance
+            });
+
+
             car.path.directionServ.route({
                 origin: car.coords,
                 destination: car.path.dest,
