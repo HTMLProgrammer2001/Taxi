@@ -51,10 +51,21 @@ class MapController{
                if(curOrder.status === stat.ORDER_WAIT){
 
                    car.status = stat.AUTO_WAIT;
+                   car.path.loaded = false;
                    car.marker.setIcon(this.icons.car.wait);
 
                    curOrder.status = stat.ORDER_AUTO;
                    curOrder.marker.setMap(null);
+
+                   //update data in db
+                   this.updateAutoData(car.autoID, {
+                       status: stat.AUTO_WAIT
+                   })
+                       .then( () =>
+                           this.updateOrderData(curOrder.orderID, {
+                               status: stat.ORDER_AUTO
+                           })
+                       );
                }
                else if(curOrder.status === stat.ORDER_MOVE){
                    car.inMove = false;
@@ -64,6 +75,16 @@ class MapController{
 
                    curOrder.marker.setMap(null);
                    car.marker.setIcon(this.icons.car.wait);
+
+                   //update info in db
+                   this.updateAutoData(car.autoID, {
+                       status: stat.AUTO_PAY
+                   })
+                       .then( () =>
+                           this.updateOrderData(curOrder.orderID, {
+                               status: stat.ORDER_PAY
+                           })
+                       );
 
                    return;
                }
@@ -113,18 +134,18 @@ class MapController{
            }
 
            if(curOrder.status === stat.ORDER_MOVE)
-                car.path.distance += this.googleMaps.geometry.spherical.computeDistanceBetween(
-                    new this.googleMaps.LatLng(car.coords.lat, car.coords.lng),
-                    new this.googleMaps.LatLng(newCoords.lat, newCoords.lng)
-                )/1000;
+               car.distance += this.googleMaps.geometry.spherical.computeDistanceBetween(
+                   new this.googleMaps.LatLng(car.coords.lat, car.coords.lng),
+                   new this.googleMaps.LatLng(newCoords.lat, newCoords.lng)
+               ) / 1000;
 
             car.marker.setPosition(newCoords);
             car.coords = newCoords;
 
             //save auto changes
-            this.dbInfo.child('auto/' + car.autoID).update({
-                coords: car.coords,
-                distance: car.path.distance
+            this.updateAutoData(car.autoID, {
+               coords: car.coords,
+               distance: car.distance
             });
 
 
@@ -165,7 +186,7 @@ class MapController{
 
     async createOrder(orderInfo){
         //if order finished or paying then don't show him
-        if([stat.ORDER_FINISHED, stat.ORDER_PAY].includes(orderInfo.status))
+        if(stat.ORDER_FINISHED === orderInfo.status)
             return;
 
         //select icon and address
@@ -184,6 +205,10 @@ class MapController{
 
         orderInfo.coords = result[0].geometry.location;
         orderInfo.marker = this.createMarker(orderInfo.coords, icon);
+
+        if([stat.ORDER_PAY, stat.ORDER_AUTO].includes(orderInfo.status))
+            orderInfo.marker.setMap(null);
+
         orderInfo.messageWindow = this.createWindow(this.createContentForOrder(orderInfo));
 
         orderInfo.marker.addListener('click', this.orderMarkerListener.bind(this, orderInfo));
@@ -195,7 +220,7 @@ class MapController{
         //select icon
         let icon = this.icons.car.free;
 
-        if([stat.AUTO_WAIT].includes(autoInfo.status))
+        if([stat.AUTO_WAIT, stat.AUTO_PAY].includes(autoInfo.status))
             icon = this.icons.car.wait;
         else
             if(autoInfo.status !== stat.AUTO_FREE)
@@ -208,9 +233,8 @@ class MapController{
         //show message window
         autoInfo.marker.addListener('click', this.autoMarkerClick.bind(this, autoInfo));
 
-        if(autoInfo.orderID)
+        if(autoInfo.orderID && autoInfo.orderID !== '' && stat.AUTO_PAY !== autoInfo.status)
             this.createPath(autoInfo);
-
 
         this.auto.push(autoInfo);
     }
@@ -223,14 +247,12 @@ class MapController{
 
     createPath(auto){
         //find destination order
-        console.log(this.orders.length);
         let curOrder = this.orders.find( (e) => {
             return e.orderID === auto.orderID;
         }),
         //create  path
         pathInfo = {dest: curOrder.coords};
 
-        //rendering
         pathInfo.directionServ = new this.googleMaps.DirectionsService;
         pathInfo.directionRenderer = new this.googleMaps.DirectionsRenderer({
             map: this.map,
@@ -245,12 +267,9 @@ class MapController{
         }, function(response, status) {
             if (status === 'OK') {
                 //change auto
-                auto.path.distance = 0;
                 auto.inMove = true;
                 auto.path.steps = response.routes[0].legs[0].steps;
                 auto.path.loaded = true;
-
-                curOrder.status = stat.ORDER_WAIT;
 
                 pathInfo.directionRenderer.setDirections(response);
             } else
@@ -273,44 +292,24 @@ class MapController{
         let content = '';
 
         //button start travel handler
-        window.onAutoButClick = (event) => {
+        window.onAutoButClick = this.autoButClick.bind(this);
 
-            let target = event.target,
-                type = target.dataset.type,
-                auto = this.auto.find((elem) => {
-                    return elem.nomer === event.target.dataset.nomer;
-                }),
-                order = this.orders.find( (elem) => {
-                   return elem.orderID === auto.orderID;
-                });
-
-            if(type === stat.EVENT_TRAVEL) {
-                this.eventTravelHandler();
-            }
-            else if(type === stat.EVENT_WAIT){
-                this.eventWaitHandler(auto, order);
-            }
-            else if(type === stat.EVENT_PAY){
-                this.eventPayHandler(auto, order);
-            }
-        };
-
-        if(!auto.orderID)
-            content = MapController.makeBut(stat.EVENT_TRAVEL, auto.nomer, 'В путь');
-        else {
-            let cost =((auto.path && auto.path.distance) * COST_PER_KM).toFixed(2);
+        if(auto.orderID && auto.orderID !== '') {
+            let cost = (auto.distance * COST_PER_KM).toFixed(2);
 
             content = `<div>Номер заказа: ${auto.orderID}</div>`;
 
-            if(auto.status === stat.AUTO_MOVE || auto.status === stat.AUTO_PAY)
+            if (auto.status === stat.AUTO_MOVE || auto.status === stat.AUTO_PAY)
                 content += `<div>Проехано на: ${cost} грн.</div>`;
 
-            if(auto.status === stat.AUTO_WAIT)
-                content += MapController.makeBut(stat.EVENT_WAIT, auto.nomer,'Пассажир прибыл');
+            if (auto.status === stat.AUTO_WAIT)
+                content += MapController.makeBut(stat.EVENT_WAIT, auto.nomer, 'Пассажир прибыл');
 
-            if(auto.status === stat.AUTO_PAY)
+            if (auto.status === stat.AUTO_PAY)
                 content += MapController.makeBut(stat.EVENT_PAY, auto.nomer, 'Оплачено');
         }
+        else
+            content = MapController.makeBut(stat.EVENT_TRAVEL, auto.nomer, 'В путь');
 
         return `
         <div class = "justify-content-center">
@@ -356,41 +355,64 @@ class MapController{
     }
 
     eventPayHandler(auto, order){
-        auto.orderID = null;
-        auto.inMove = false;
-        auto.status = stat.AUTO_FREE;
-        auto.path = {};
+        //update info in db
+        this.updateAutoData(auto.autoID, {
+            status: stat.AUTO_FREE,
+            orderID: '',
+            distance: 0
+        })
+            .then( () =>
+                this.updateOrderData(order.orderID, {
+                    status: stat.ORDER_FINISHED,
+                    price: (auto.distance * COST_PER_KM).toFixed(2)
+                })
+            )
+            .then( () => {
+                //update local info
 
-        auto.marker.setIcon(this.icons.car.free);
+                auto.orderID = '';
+                auto.distance = 0;
+                auto.inMove = false;
+                auto.status = stat.AUTO_FREE;
+                auto.path = {};
 
-        auto.messageWindow.close();
+                auto.marker.setIcon(this.icons.car.free);
+
+                auto.messageWindow.close();
+            });
     }
 
     eventWaitHandler(auto, order){
+        //change auto properties
         auto.status = stat.AUTO_MOVE;
         auto.marker.setIcon(this.icons.car.busy);
 
         order.status = stat.ORDER_MOVE;
 
-        this.geocode({address: order.destination}).then( (res, status) => {
-            if(status === 'OK'){
-                order.marker.setPosition(res[0].geometry.location);
-                order.marker.setMap(this.map);
-                order.marker.setIcon(this.icons.order.inMove);
+        //get destination coords
+        this.geocode({address: order.destination}).then( (res) => {
 
-                auto.path.dest = res[0].geometry.location;
-                auto.path.loaded = false;
-            }
-            else
-                alert('Error in geocoding');
+            //update data in db
+            this.updateAutoData(auto.autoID, {status: stat.AUTO_MOVE})
+                .then( () =>
+                    this.updateOrderData(order.orderID, {status: stat.ORDER_MOVE})
+                )
+                .then( () => {
+                    order.marker.setPosition(res[0].geometry.location);
+                    order.marker.setMap(this.map);
+                    order.marker.setIcon(this.icons.order.inMove);
+
+                    auto.path.dest = res[0].geometry.location;
+                    auto.path.loaded = false;
+                } );
         });
     }
 
     async loadData(data){
-        for(let i = 0; i < data.orders.length; i++){
-            if(data.orders[i]){
-                await this.createOrder({orderID: i, ...data.orders[i]});
-            }
+        for(let key in data.orders){
+            console.log(data.orders[key]);
+
+            await this.createOrder({orderID: key, ...data.orders[key]});
         }
 
         data.auto.forEach( (auto, autoID) => {
@@ -424,19 +446,21 @@ class MapController{
                 this.selectedAuto.messageWindow.close();
 
                 //save database
-                this.dbInfo.child('orders/' + orderInfo.orderID).update({
-                    autoID: this.selectedAuto.autoID,
-                    status: stat.ORDER_WAIT
-                }).then( () =>
-                    this.dbInfo.child('auto/' + this.selectedAuto.autoID).update({
-                        orderID: orderInfo.orderID,
-                        status: stat.AUTO_ORDER
-                    })
-                ).then( () => {
-                    this.createPath(this.selectedAuto);
+                this.updateOrderData(orderInfo.orderID, {
+                   autoID: this.selectedAuto.autoID,
+                   status: stat.ORDER_WAIT
+                })
+                    .then( () =>
+                        this.updateAutoData(this.selectedAuto.autoID, {
+                           orderID: orderInfo.orderID,
+                           status: stat.AUTO_ORDER
+                        })
+                    )
+                    .then( () => {
+                        this.createPath(this.selectedAuto);
 
-                    this.selectedAuto = null;
-                });
+                        this.selectedAuto = null;
+                    } );
             }
         }
     }
@@ -451,12 +475,36 @@ class MapController{
         autoInfo.messageWindow.open(this.map, autoInfo.marker);
     }
 
-    //promisification of geocode
+    autoButClick(event){
+        let target = event.target,
+            type = target.dataset.type,
+            auto = this.auto.find((elem) => {
+                return elem.nomer === event.target.dataset.nomer;
+            });
+
+            console.log(this);
+            let
+            order = this.orders.find( (elem) => {
+                return elem.orderID === auto.orderID;
+            });
+
+        if(type === stat.EVENT_TRAVEL) {
+            this.eventTravelHandler();
+        }
+        else if(type === stat.EVENT_WAIT){
+            this.eventWaitHandler(auto, order);
+        }
+        else if(type === stat.EVENT_PAY){
+            this.eventPayHandler(auto, order);
+        }
+    }
+
+    //promising of geocode
     geocode(data){
         return new Promise( (resolve, reject) => {
            try{
                this.geodecoder.geocode(data, (result, status) => {
-                   if(status != 'OK')
+                   if(status !== 'OK')
                        reject(result);
                    else
                        resolve(result);
@@ -466,6 +514,19 @@ class MapController{
                reject(e);
            }
         });
+    }
+
+    //update data
+    updateAutoData(autoID, data){
+        console.log('Auto:', data);
+
+        return this.dbInfo.child('auto/' + autoID).update(data);
+    }
+
+    updateOrderData(orderID, data){
+        console.log('Order:', data);
+
+        return this.dbInfo.child('orders/' + orderID).update(data);
     }
 
     static makeBut(type, nomer, text){

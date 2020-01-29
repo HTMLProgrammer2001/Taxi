@@ -120,6 +120,23 @@ class RegistryForm extends React.Component{
         event.preventDefault();
 
         //Test input
+        let errors = this.testForm();
+
+        //display errors
+        if(Object.keys(errors).length){
+            this.setState({
+                fieldsError: errors
+            });
+
+            return;
+        }
+
+        //create user
+        this.createUser();
+
+    }
+
+    testForm(){
         let errors = {};
 
         if(!(new RegExp('.+@.{3,8}\..{3,8}').test(this.state.fieldsValue.userEmail)))
@@ -131,23 +148,10 @@ class RegistryForm extends React.Component{
         if(this.state.fieldsValue.userPassword.length < 8)
             errors.userPassword = 'Minimum password length is 8';
 
-        if(this.state.fieldsValue.confirmPassword != this.state.fieldsValue.userPassword)
+        if(this.state.fieldsValue.confirmPassword !== this.state.fieldsValue.userPassword)
             errors.confirmPassword = 'Passwords are not equals';
 
-        //display errors
-        for(let error in errors){
-            if(error) {
-                this.setState({
-                    fieldsError: errors
-                });
-
-                return;
-            }
-        }
-
-        //create user
-        this.createUser();
-
+        return errors;
     }
 
     createUser(){

@@ -1,5 +1,7 @@
+//myComponents
 import MapController from './MapClass';
 import Header from '../Header';
+import OrderForm from './OrderForm';
 
 const loadGoogleMapsApi = require('load-google-maps-api');
 import {Redirect} from 'react-router-dom';
@@ -10,6 +12,8 @@ class Dashboard extends React.Component{
 
         this.mapControll = null;
         this.mapElem = null;
+
+        this.onOrderCreate = this.onOrderCreate.bind(this);
     }
 
     componentDidMount(){
@@ -31,15 +35,27 @@ class Dashboard extends React.Component{
     }
 
     render(){
-        // if(!firebaseProj.auth().currentUser)
-        //     return <Redirect to = "/"/>
+        //if(!firebaseProj.auth().currentUser)
+        //    return <Redirect to = "/"/>
 
         return (
             <React.Fragment>
                 <Header/>
-                <div id = "map" ref = {(elem) => this.mapElem = elem}></div>
+                <div
+                    id = "map"
+                    ref = {(elem) => this.mapElem = elem}
+                >.</div>
+
+                <div className="mt-3 d-flex justify-content-center">
+                    <OrderForm
+                        onCreate = {this.onOrderCreate}/>
+                </div>
             </React.Fragment>
         );
+    }
+
+    onOrderCreate(order){
+        this.mapControll.createOrder(order);
     }
 }
 

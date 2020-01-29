@@ -5,7 +5,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 let conf = {
 	entry: {
-		main: './src/js/index.js'
+		main: './src/js/index.jsx'
 	},
 	output: {
 		filename: 'js/[name].js',
@@ -96,7 +96,9 @@ let conf = {
 			scss: path.resolve(__dirname, 'src/scss'),
 			js: path.resolve(__dirname, 'src/js'),
 			pages: path.resolve(__dirname, 'src/pages')
-		}
+		},
+
+		extensions: ['.js', '.jsx']
 	}
 };
 
