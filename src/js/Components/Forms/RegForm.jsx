@@ -1,5 +1,4 @@
-import {Redirect} from 'react-router-dom';
-
+import RegError from './Error';
 
 class RegistryForm extends React.Component{
     constructor(props){
@@ -10,34 +9,16 @@ class RegistryForm extends React.Component{
         this.addUser = this.addUser.bind(this);
 
         this.state = {
-            fieldsValue: {
-                userName: '',
-                userEmail: '',
-                userPassword: '',
-                confirmPassword: ''
-            },
+            fieldsValue: {},
             fieldsError: {},
-            registed: false
+            registrationError: null
         }
     }
 
     render(){
-        //if register then show success message
-        if(this.state.registed){
-            return (
-                <Redirect to="/profile" push={true}/>
-            );
-        }
-
-        //... else return form
         return (
             <form onSubmit={this.addUser}>
-
-                {this.state.fieldsError.anotherError &&
-                    <div
-                        className="alert alert-danger">
-                            {this.state.fieldsError.anotherError}
-                    </div>}
+                <RegError error = {this.state.registrationError} successRedirect = '/profile'/>
 
                 <input
                     type="email"
@@ -102,18 +83,12 @@ class RegistryForm extends React.Component{
         let tar = event.target;
 
         this.setState(
-            (prev) => {
-                let changes = {
+            (prev) => ({
+                fieldsValue: {
+                    ...prev.fieldsValue,
                     [tar.name]: tar.value
-                };
-
-                return {
-                    fieldsValue: {
-                        ...prev.fieldsValue,
-                        ...changes
-                    }
-                };
-            });
+                }
+            }));
     }
 
     addUser(event){
@@ -122,14 +97,12 @@ class RegistryForm extends React.Component{
         //Test input
         let errors = this.testForm();
 
-        //display errors
-        if(Object.keys(errors).length){
-            this.setState({
-                fieldsError: errors
-            });
+        this.setState({
+            fieldsError: errors
+        });
 
+        if(Object.keys(errors).length)
             return;
-        }
 
         //create user
         this.createUser();
@@ -145,7 +118,7 @@ class RegistryForm extends React.Component{
         if(!this.state.fieldsValue.userName)
             errors.userName = 'Enter your name';
 
-        if(this.state.fieldsValue.userPassword.length < 8)
+        if(!this.state.fieldsValue.userPassword || this.state.fieldsValue.userPassword.length < 8)
             errors.userPassword = 'Minimum password length is 8';
 
         if(this.state.fieldsValue.confirmPassword !== this.state.fieldsValue.userPassword)
@@ -156,35 +129,28 @@ class RegistryForm extends React.Component{
 
     createUser(){
         //register user in database
-        let user = firebaseProj.auth().createUserWithEmailAndPassword(
+        firebaseProj.auth().createUserWithEmailAndPassword(
             this.state.fieldsValue.userEmail,
             this.state.fieldsValue.userPassword
-        );
+        )
+            .then( (response) =>
+                response.user.updateProfile({
+                    displayName: this.state.fieldsValue.userName
+                })
+            )
+            .then( () => {
+                this.setState({
+                    registrationError: ''
+                });
 
-        user.then((response) => {
-            //update user name
-            response.user.updateProfile({
-                displayName: this.state.fieldsValue.userName
-            }).then(
-                //redraw component for redirect
-                () => {
-                    this.setState({
-                        registed: true,
-                        fieldsError: {},
-                        fieldsValue: {}
-                    })
-                }
-            );
-
-        }, (error) => {
-            //redraw component to display errors
-            this.setState({
-                registed: false,
-                fieldsError: {
-                    anotherError: 'Ошибка: ' +  error.message
-                }
+                return user.sendEmailVerification();
+            })
+            .catch( (error) => {
+                //redraw component to display errors
+                this.setState({
+                    registrationError: error.message
+                });
             });
-        });
     }
 }
 

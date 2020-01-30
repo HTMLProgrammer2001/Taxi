@@ -1,5 +1,5 @@
-import Auth from './AuthorizationForm';
-import Registration from './RegistryForm';
+import Auth from './AuthForm.jsx';
+import Registration from './RegForm.jsx';
 
 function Forms(){
     return (

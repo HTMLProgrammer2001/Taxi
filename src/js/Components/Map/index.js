@@ -1,7 +1,5 @@
 import MapClass from './MapClass';
-import Header from '../Header';
-
-import {Redirect} from 'react-router-dom';
+import Layout from 'js/Layout';
 
 const loadGoogleMapsApi = require('load-google-maps-api');
 
@@ -22,20 +20,10 @@ class Map extends React.Component{
     }
 
     render(){
-        let user = firebaseProj.auth().currentUser;
-
-        if(!user)
-            return (
-                <Redirect to = "/"/>
-            );
-
         return (
-            <React.Fragment>
-                <Header/>
-                <div id = "map" ref = {(elem) => this.mapElem = elem}></div>
-            </React.Fragment>
+            <div id = "map" ref = {(elem) => this.mapElem = elem}></div>
         );
     }
 }
 
-export default Map;
+export default Layout(Map);

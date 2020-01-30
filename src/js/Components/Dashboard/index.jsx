@@ -1,10 +1,9 @@
 //myComponents
 import MapController from './MapClass';
-import Header from '../Header';
 import OrderForm from './OrderForm';
+import Layout from 'js/Layout';
 
 const loadGoogleMapsApi = require('load-google-maps-api');
-import {Redirect} from 'react-router-dom';
 
 class Dashboard extends React.Component{
     constructor(props){
@@ -35,12 +34,9 @@ class Dashboard extends React.Component{
     }
 
     render(){
-        //if(!firebaseProj.auth().currentUser)
-        //    return <Redirect to = "/"/>
 
         return (
             <React.Fragment>
-                <Header/>
                 <div
                     id = "map"
                     ref = {(elem) => this.mapElem = elem}
@@ -59,4 +55,4 @@ class Dashboard extends React.Component{
     }
 }
 
-export default Dashboard;
+export default Layout(Dashboard);

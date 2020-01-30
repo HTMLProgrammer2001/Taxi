@@ -364,7 +364,8 @@ class MapController{
             .then( () =>
                 this.updateOrderData(order.orderID, {
                     status: stat.ORDER_FINISHED,
-                    price: (auto.distance * COST_PER_KM).toFixed(2)
+                    price: (auto.distance * COST_PER_KM).toFixed(2),
+                    orderFinished: +new Date()
                 })
             )
             .then( () => {
@@ -448,7 +449,8 @@ class MapController{
                 //save database
                 this.updateOrderData(orderInfo.orderID, {
                    autoID: this.selectedAuto.autoID,
-                   status: stat.ORDER_WAIT
+                   status: stat.ORDER_WAIT,
+                    orderAccept: +new Date()
                 })
                     .then( () =>
                         this.updateAutoData(this.selectedAuto.autoID, {

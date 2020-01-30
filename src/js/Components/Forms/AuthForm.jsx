@@ -1,6 +1,6 @@
-import {Redirect} from 'react-router-dom';
+import AuthError from './Error';
 
-class AuthorizationForm extends React.Component{
+class AuthForm extends React.Component{
     constructor(props){
         super(props);
 
@@ -8,10 +8,8 @@ class AuthorizationForm extends React.Component{
         this.onFieldChange = this.onFieldChange.bind(this);
 
         this.state = {
-            fieldsValue: {
-                userEmail: '',
-                userPassword: ''
-            },
+            fieldsValue: {},
+            fieldsError: {},
             authorizedError: null
         }
     }
@@ -19,31 +17,29 @@ class AuthorizationForm extends React.Component{
     render() {
         return (
             <form onSubmit={this.signUp}>
-                {
-                    this.state.authorizedError
-                        ?
-                    <div className="alert alert-danger">
-                        {this.state.authorizedError}
-                    </div>
-                        :
-                    <span>
-                        { this.state.authorizedError === '' && <Redirect to = "/map" push={true}/> }
-                    </span>
-                }
+                <AuthError error = {this.state.authorizedError} successRedirect = '/map'/>
 
                 <input
                     type="email"
                     name = "userEmail"
                     onInput={this.onFieldChange}
-                    className="form-control mb-3"
+                    className="form-control"
                     placeholder="Enter email"/>
+
+                <label className="text-danger" htmlFor="userEmail">
+                    {this.state.fieldsError.userEmail}
+                </label>
 
                 <input
                     type="password"
                     name = "userPassword"
                     onInput={this.onFieldChange}
-                    className="form-control mb-3"
+                    className="form-control"
                     placeholder="Enter password"/>
+
+                <label className="text-danger mb-3 d-block" htmlFor="userPassword">
+                    {this.state.fieldsError.userPassword}
+                </label>
 
                 <button type = "submit" name = "authorization" className="btn btn-primary">Авторизироваться</button>
             </form>
@@ -53,30 +49,32 @@ class AuthorizationForm extends React.Component{
     onFieldChange(event){
         let tar = event.target;
 
-        this.setState(
-            (prev) => {
-                let changes = {
-                    [tar.name]: tar.value
-                };
-
-                return {
-                    fieldsValue: {
-                        ...prev.fieldsValue,
-                        ...changes
-                    }
-                };
-            });
+        this.setState( (prev) => ({
+          fieldsValue: {
+              ...prev.fieldsValue,
+              [tar.name]: tar.value
+          }
+        }) );
     }
 
     signUp(event){
         //prevent page reload
         event.preventDefault();
 
+        //test form
+        let errors = this.testForm();
+
+        this.setState({
+            fieldsError: errors
+        });
+
+        if(Object.keys(errors).length)
+            return;
+
         //register new user
         firebaseProj.auth().signInWithEmailAndPassword(
             this.state.fieldsValue.userEmail,
             this.state.fieldsValue.userPassword
-
         ).then( () => {
             //User authorized success
            this.setState({
@@ -90,6 +88,18 @@ class AuthorizationForm extends React.Component{
 
         });
     }
+
+    testForm(){
+        let errors = {};
+
+        if(!(new RegExp('.+@.{3,8}\..{3,8}').test(this.state.fieldsValue.userEmail)))
+            errors.userEmail = 'Input correct email';
+
+        if(!this.state.fieldsValue.userPassword || this.state.fieldsValue.userPassword.length < 8)
+            errors.userPassword = 'Minimum password length is 8';
+
+        return errors;
+    }
 }
 
-export default AuthorizationForm;
+export default AuthForm;

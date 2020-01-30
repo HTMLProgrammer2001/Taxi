@@ -1,18 +1,9 @@
-import {Redirect} from 'react-router-dom';
-import Header from './Header';
+import Layout from 'js/Layout';
 
 function Profile(){
     let user = firebaseProj.auth().currentUser;
 
-    if(!user)
-        return (
-            <Redirect to = "/"/>
-        );
-
     return(
-        <React.Fragment>
-            <Header/>
-
             <div className="container my-5 row justify-content-center">
                 <div className="overflow-hidden col-sm-3 col-offset-2">
                    <img src={require('assets/defAvatar.png')} alt=""/>
@@ -48,8 +39,7 @@ function Profile(){
                     </tbody>
                 </table>
             </div>
-        </React.Fragment>
     );
 }
 
-export default Profile;
+export default Layout(Profile);

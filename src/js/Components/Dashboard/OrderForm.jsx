@@ -11,13 +11,24 @@ class OrderForm extends React.Component{
                 orderDestination: '',
                 orderPhone: ''
             },
-            fieldsError: {}
+            fieldsError: {},
+            savingError: null
         }
     }
 
     render(){
+        console.log(this.state);
+
         return (
             <form onSubmit={this.addOrder} className="w-50 align-items-center d-flex flex-column">
+                {this.state.savingError ?
+                    <div className="alert alert-danger">
+                        {this.state.savingError}
+                    </div>
+                        :
+                    null
+                }
+
                 <h3 className="text-center">Добавить заказ</h3>
 
                 <input
@@ -70,18 +81,12 @@ class OrderForm extends React.Component{
         let tar = event.target;
 
         this.setState(
-            (prev) => {
-                let changes = {
+            (prev) => ({
+                fieldsValue: {
+                    ...prev.fieldsValue,
                     [tar.name]: tar.value
-                };
-
-                return {
-                    fieldsValue: {
-                        ...prev.fieldsValue,
-                        ...changes
-                    }
-                };
-            });
+               }
+            }));
     }
 
     async addOrder(event){
@@ -89,13 +94,12 @@ class OrderForm extends React.Component{
 
         let errors = this.testForm();
 
-        if(Object.keys(errors).length){
-            this.setState({
-                fieldsError: errors
-            });
+        this.setState({
+            fieldsError: errors
+        });
 
+        if(Object.keys(errors).length)
             return;
-        }
 
         //create order
         let orderObj = {
@@ -103,7 +107,8 @@ class OrderForm extends React.Component{
             start: this.state.fieldsValue.orderStart,
             status: 'Free',
             orderCreate: +new Date(),
-            phone: this.state.fieldsValue.orderPhone
+            phone: this.state.fieldsValue.orderPhone,
+            user: firebaseProj.auth().currentUser.uid
         },
         newOrder = await firebaseProj
             .database()
@@ -121,11 +126,12 @@ class OrderForm extends React.Component{
                         orderStart: '',
                         orderDestination: '',
                         orderPhone: ''
-                    }
+                    },
+                    savingError: null
                 });
             }, (err) => {
                 this.setState({
-                   fieldsError: {anotherError: err.message}
+                   savingError: err.message
                 });
             });
 

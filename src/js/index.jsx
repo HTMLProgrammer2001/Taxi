@@ -9,10 +9,10 @@ import ReactDOM from 'react-dom';
 import firebase from 'firebase';
 
 //myComponents
-import Forms from './Components/Forms/';
-import Profile from './Components/Profile';
-import Map from './Components/Map/';
-import Dashboard from './Components/Dashboard';
+let Map = React.lazy( () => import('./Components/Map/') );
+let Forms = React.lazy( () => import('./Components/Forms/') );
+let Profile = React.lazy( () => import('./Components/Profile') );
+let Dashboard = React.lazy( () => import('./Components/Dashboard/') );
 
 //config
 import fireBaseConfig from './fareConfig';
@@ -21,21 +21,23 @@ window.firebaseProj = firebase.initializeApp(fireBaseConfig);
 
 ReactDOM.render(
     <Router>
-        <Route exact path = "/">
-            <Forms/>
-        </Route>
+        <React.Suspense fallback = {<div>Загрузка контента</div>}>
+            <Route exact path = "/">
+                <Forms/>
+            </Route>
 
-        <Route path = "/profile">
-            <Profile/>
-        </Route>
+            <Route path = "/profile">
+                <Profile/>
+            </Route>
 
-        <Route path = "/map">
-            <Map/>
-        </Route>
+            <Route path = "/map">
+                <Map/>
+            </Route>
 
-        <Route path = "/dashboard">
-            <Dashboard/>
-        </Route>
+            <Route path = "/dashboard">
+                <Dashboard/>
+            </Route>
+        </React.Suspense>
     </Router>,
     document.querySelector('#main')
 );
