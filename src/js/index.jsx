@@ -20,7 +20,7 @@ import fireBaseConfig from './fareConfig';
 window.firebaseProj = firebase.initializeApp(fireBaseConfig);
 
 ReactDOM.render(
-    <Router>
+    <Router basename="/dist">
         <React.Suspense fallback = {<div>Загрузка контента</div>}>
             <Route exact path = "/">
                 <Forms/>

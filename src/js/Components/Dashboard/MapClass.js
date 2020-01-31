@@ -172,13 +172,10 @@ class MapController{
     }
 
     createMap(mapElement) {
-        navigator.geolocation.getCurrentPosition((res) => {
-            //create map with centre in the current user position
-            this.map = new this.googleMaps.Map(mapElement, {
-                center: { lat: res.coords.latitude, lng: res.coords.longitude },
-                zoom: 15,
-                mapTypeControl: false
-            });
+        this.map = new this.googleMaps.Map(mapElement, {
+            center: { lat: 46.65, lng: 32.58 },
+            zoom: 15,
+            mapTypeControl: false
         });
 
         setInterval(this.animateMove.bind(this), 2000);
