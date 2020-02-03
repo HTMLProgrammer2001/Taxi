@@ -10,15 +10,20 @@ let initialState = {
 };
 
 function FormReducer(state = initialState, action){
+    let res;
     switch(action.type){
         case ACTIONS.FILTER_DRIVER_CHANGE:
             return {...state, driver: action.payload};
 
         case ACTIONS.FILTER_STARTDATE_CHANGE:
-            return {...state, dateStart: +Date.parse(action.payload)};
+            res = action.payload ? +Date.parse(action.payload) : 0;
+
+            return {...state, dateStart: res};
 
         case ACTIONS.FILTER_ENDDATE_CHANGE:
-            return {...state, dateEnd: +Date.parse(action.payload)};
+            res = action.payload ? +Date.parse(action.payload) : Date.now();
+
+            return {...state, dateEnd: res};
 
         case ACTIONS.FILTER_STATUS_CHANGE:
             return {...state, status: action.payload};

@@ -13,7 +13,11 @@ class HistoryForm extends React.Component{
                         <select
                             name = "driver"
                             className="custom-select mb-3"
-                            onChange = {(e) => this.props.changeDriver(e.target.value)}
+                            onChange = {
+                                (e) => this.props.historyFilterChange(
+                                    creators.historyDriverChange(e.target.value)
+                                )
+                            }
                         >
                             <option value = "">All</option>
                             <option value="0">0</option>
@@ -28,7 +32,11 @@ class HistoryForm extends React.Component{
                             type="date"
                             className="form-control mb-3"
                             placeholder="Date start"
-                            onChange={(e) => this.props.changeStartDate(e.target.value)}
+                            onChange={
+                                (e) => this.props.historyFilterChange(
+                                    creators.historyDateStartChange(e.target.value)
+                                )
+                            }
                         />
                     </div>
 
@@ -39,7 +47,11 @@ class HistoryForm extends React.Component{
                             type="date"
                             className="form-control mb-3"
                             placeholder="Date end"
-                            onChange={(e) => this.props.changeEndDate(e.target.value)}
+                            onChange={
+                                (e) => this.props.historyFilterChange(
+                                    creators.historyDateEndChange(e.target.value)
+                                )
+                            }
                         />
                     </div>
 
@@ -48,7 +60,11 @@ class HistoryForm extends React.Component{
 
                         <select
                             className="custom-select mb-3"
-                            onChange = {(e) => this.props.changeStatus(e.target.value)}
+                            onChange={
+                                (e) => this.props.historyFilterChange(
+                                    creators.historyStatusChange(e.target.value)
+                                )
+                            }
                         >
                             <option value = "">All</option>
                             {
@@ -67,7 +83,11 @@ class HistoryForm extends React.Component{
 
                         <select
                             className="custom-select mb-3"
-                            onChange={(e) => this.props.changeSortField(e.target.value)}
+                            onChange={
+                                (e) => this.props.historyFilterChange(
+                                    creators.historySortFieldChange(e.target.value)
+                                )
+                            }
                         >
                             <option value="orderCreate">Date of create</option>
                             <option value="status">Status</option>
@@ -85,9 +105,11 @@ class HistoryForm extends React.Component{
                                 name = "sortDir"
                                 value="ASC"
                                 defaultChecked={true}
-                                onClick={(e) => {
-                                    this.props.changeSortDir(e.target.form.sortDir.value);
-                                }}
+                                onClick={
+                                    (e) => this.props.historyFilterChange(
+                                        creators.historySortDirectionChange(e.target.form.sortDir.value)
+                                    )
+                                }
                                 style = {{zIndex: 9999}}
                             />
                             <label
@@ -102,9 +124,11 @@ class HistoryForm extends React.Component{
                                 className="custom-control-input"
                                 name = "sortDir"
                                 value = "DESC"
-                                onClick={(e) => {
-                                    this.props.changeSortDir(e.target.form.sortDir.value);
-                                }}
+                                onClick={
+                                    (e) => this.props.historyFilterChange(
+                                        creators.historySortDirectionChange(e.target.form.sortDir.value)
+                                    )
+                                }
                                 style = {{zIndex: 9999}}
                             />
                             <label
@@ -126,12 +150,7 @@ let stateToProps = (state) => {
 
 let dispatchToProps = (dispatch) => {
     return {
-        changeDriver: (pay) => dispatch(creators.historyDriverChange(pay)),
-        changeStartDate: (pay) => dispatch(creators.historyDateStartChange(pay)),
-        changeEndDate: (pay) => dispatch(creators.historyDateEndChange(pay)),
-        changeStatus: (pay) => dispatch(creators.historyStatusChange(pay)),
-        changeSortField: (pay) => dispatch(creators.historySortFieldChange(pay)),
-        changeSortDir: (pay) => dispatch(creators.historySortDirectionChange(pay))
+        historyFilterChange: (action) => dispatch(action)
     };
 };
 
