@@ -4,7 +4,7 @@ let initialState = {
     driver: '',
     status: '',
     dateStart: 0,
-    dateEnd: +new Date(),
+    dateEnd: null,
     sortBy: 'orderCreate',
     sortDir: 'ASC'
 };

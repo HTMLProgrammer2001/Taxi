@@ -21,6 +21,27 @@ export function historyOrderFail(error) {
     };
 }
 
+export function historyOrderAdd(payload) {
+    return {
+        type: ACTIONS.ORDER_ADD,
+        payload
+    };
+}
+
+export function historyOrderChange(payload) {
+    return {
+        type: ACTIONS.ORDER_CHANGE,
+        payload
+    };
+}
+
+export function historyOrderRemove(orderID) {
+    return {
+        type: ACTIONS.ORDER_REMOVE,
+        payload: orderID
+    };
+}
+
 //history filter
 export function historyDriverChange(payload){
     return {

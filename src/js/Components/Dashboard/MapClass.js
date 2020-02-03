@@ -148,6 +148,9 @@ class MapController{
                distance: car.distance
             });
 
+            if([stat.AUTO_PAY, stat.AUTO_WAIT, stat.AUTO_FREE].includes(car.status))
+                return;
+
 
             car.path.directionServ.route({
                 origin: car.coords,
@@ -408,7 +411,6 @@ class MapController{
 
     async loadData(data){
         for(let key in data.orders){
-            console.log(data.orders[key]);
 
             await this.createOrder({orderID: key, ...data.orders[key]});
         }
@@ -481,7 +483,6 @@ class MapController{
                 return elem.nomer === event.target.dataset.nomer;
             });
 
-            console.log(this);
             let
             order = this.orders.find( (elem) => {
                 return elem.orderID === auto.orderID;
@@ -517,13 +518,11 @@ class MapController{
 
     //update data
     updateAutoData(autoID, data){
-        console.log('Auto:', data);
 
         return this.dbInfo.child('auto/' + autoID).update(data);
     }
 
     updateOrderData(orderID, data){
-        console.log('Order:', data);
 
         return this.dbInfo.child('orders/' + orderID).update(data);
     }

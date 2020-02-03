@@ -2,6 +2,9 @@
 export const ORDERS_LOAD_START = 'ORDERS_LOAD_START';
 export const ORDERS_LOAD_SUCCESS = 'ORDERS_LOAD_SUCCESS';
 export const ORDERS_LOAD_FAIL = 'ORDERS_LOAD_FAIL';
+export const ORDER_ADD = 'ORDER_ADD';
+export const ORDER_CHANGE = 'ORDER_CHANGE';
+export const ORDER_REMOVE = 'ORDER_REMOVE';
 
 //HistoryForm
 export const FILTER_DRIVER_CHANGE = 'FILTER_DRIVER_CHANGE';

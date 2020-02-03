@@ -17,7 +17,6 @@ class OrderForm extends React.Component{
     }
 
     render(){
-        console.log(this.state);
 
         return (
             <form onSubmit={this.addOrder} className="w-50 align-items-center d-flex flex-column">

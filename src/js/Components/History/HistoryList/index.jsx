@@ -30,12 +30,13 @@ let stateToProps = (state) => {
 
     //check auto
     orders = orders.filter( (ord) => {
-        return state.history.form.driver === '' || state.history.form.driver == ord.autoID;
+        return state.history.form.driver === '' || state.history.form.driver === ord.autoID;
     } );
 
     //check date
     orders = orders.filter( (ord) => {
-        return ord.orderCreate > state.history.form.dateStart && ord.orderCreate < state.history.form.dateEnd;
+        return ord.orderCreate > state.history.form.dateStart
+            && (!state.history.form.dateEnd || ord.orderCreate < state.history.form.dateEnd);
     } );
 
     //check status
@@ -57,32 +58,31 @@ let stateToProps = (state) => {
 
 let loadData = () => {
     return dispatch => {
-        //start loading
-        dispatch(creators.historyOrderLoad());
 
-        firebaseProj
-            .database()
-            .ref('/orders')
-            .once('value', (response) => {
-                //get user obj
-                let user = firebaseProj.auth().currentUser;
+        //real time update
+        firebaseProj.database().ref("/orders").on('child_changed', (snap) => {
+            dispatch(
+                creators.historyOrderChange({
+                    orderID: snap.key,
+                    ...snap.val()
+                })
+            );
+        });
 
-                //search user orders
-                let userOrders = [],
-                    orders = response.val();
+        firebaseProj.database().ref("/orders").on('child_added', (snap) => {
+            dispatch(
+                creators.historyOrderAdd({
+                    orderID: snap.key,
+                    ...snap.val()
+                })
+            );
+        });
 
-                for(let [key, order] of Object.entries(orders)) {
-                    if(order.user === user.uid)
-                        userOrders.push({orderID: key, ...orders[key]});
-                }
-
-                //save orders
-                dispatch(creators.historyOrderSuccess(userOrders));
-
-            }, (error) => {
-                //dispatch error
-                dispatch(creators.historyOrderFail(error));
-            });
+        firebaseProj.database().ref("/orders").on('child_removed', (snap) => {
+            dispatch(
+                creators.historyOrderAdd(snap.key)
+            );
+        });
     }
 };
 
