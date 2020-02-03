@@ -6,6 +6,7 @@ function HistoryItem(props){
             if(order.status === stat.ORDER_FINISHED) {
                 return (
                     <div>
+                        <div>ID водителя: {order.autoID}</div>
                         <div>Дата принятия: {new Date(order.orderAccept).toLocaleString()}</div>
                         <div>Дата завершения: {new Date(order.orderFinished).toLocaleString()}</div>
                         <div>Цена: {order.price} грн</div>

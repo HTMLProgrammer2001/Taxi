@@ -49,3 +49,17 @@ export function historyStatusChange(payload){
         payload
     };
 }
+
+export function historySortFieldChange(payload) {
+    return {
+      type: ACTIONS.SORT_FIELD_CHANGE,
+      payload
+    };
+}
+
+export function historySortDirectionChange(payload) {
+    return {
+        type: ACTIONS.SORT_DIRECTION_CHANGE,
+        payload
+    };
+}

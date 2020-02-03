@@ -13,11 +13,14 @@ class HistoryList extends React.Component{
             return <div>Загрузка данных...</div>;
 
         if(this.props.historyOrders.error)
-            return <div className="text-danger">Ошибка загрузки заказов: {error.message}</div>
+            return <div className="text-danger">Ошибка загрузки заказов: {error.message}</div>;
+
+        if(!this.props.historyOrders.val.length)
+            return <div>Записей по данному фильтру не найдено.</div>
 
         return this.props.historyOrders.val.map(
             (order) =>
-                <HistoryItem order = {order}/>
+                <HistoryItem order = {order} key = {order.orderID}/>
         );
     }
 }
@@ -27,7 +30,7 @@ let stateToProps = (state) => {
 
     //check auto
     orders = orders.filter( (ord) => {
-        return !state.history.form.driver || state.history.form.driver == ord.autoID;
+        return state.history.form.driver === '' || state.history.form.driver == ord.autoID;
     } );
 
     //check date
@@ -39,6 +42,13 @@ let stateToProps = (state) => {
     orders = orders.filter( (ord) => {
         return !state.history.form.status || ord.status == state.history.form.status;
     } );
+
+    orders = orders.sort((a, b) => {
+       return state.history.form.sortDir === 'ASC' ?
+                a[state.history.form.sortBy] > b[state.history.form.sortBy]
+            :
+                a[state.history.form.sortBy] < b[state.history.form.sortBy];
+    });
 
     return {
         historyOrders: {...state.history.orders, val: orders}
