@@ -17,7 +17,7 @@ class AuthForm extends React.Component{
     render() {
         return (
             <form onSubmit={this.signUp}>
-                <AuthError error = {this.state.authorizedError} successRedirect = '/map'/>
+                <AuthError error = {this.state.authorizedError} successRedirect = '/dashboard'/>
 
                 <input
                     type="email"

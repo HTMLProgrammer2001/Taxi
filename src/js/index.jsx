@@ -13,7 +13,6 @@ import thunk from 'redux-thunk';
 import {composeWithDevTools} from 'redux-devtools-extension';
 
 //myComponents
-const Map = React.lazy( () => import('./Components/Map/') );
 const Forms = React.lazy( () => import('./Components/Forms/') );
 const Profile = React.lazy( () => import('./Components/Profile') );
 const Dashboard = React.lazy( () => import('./Components/Dashboard/') );
@@ -33,13 +32,8 @@ ReactDOM.render(
         <Router>
             <React.Suspense fallback = {<div>Загрузка контента</div>}>
                 <Route exact path = "/" component = {Forms}/>
-
                 <Route path = "/profile" component = {Profile}/>
-
-                <Route path = "/map" component = {Map}/>
-
                 <Route path = "/dashboard" component = {Dashboard}/>
-
                 <Route path = "/history" component = {History}/>
             </React.Suspense>
         </Router>

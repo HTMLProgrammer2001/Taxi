@@ -21,7 +21,7 @@ function FormReducer(state = initialState, action){
             return {...state, dateStart: res};
 
         case ACTIONS.FILTER_ENDDATE_CHANGE:
-            res = action.payload ? +Date.parse(action.payload) : Date.now();
+            res = action.payload ? +Date.parse(action.payload) : null;
 
             return {...state, dateEnd: res};
 
