@@ -18,5 +18,6 @@ export const EVENT_TRAVEL = 'InTravel';
 export const EVENT_PAY = 'Pay';
 export const EVENT_WAIT = 'Wait';
 
-const COST_PER_KM = 10;
-export default COST_PER_KM;
+export const COST_PER_KM = 10;
+export const COST_BUSY_PER_KM = 12.5;
+export const COST_OFFCITY_PER_KM = 20;

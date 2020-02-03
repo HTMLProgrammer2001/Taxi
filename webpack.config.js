@@ -67,7 +67,7 @@ let conf = {
 				}
 			},
 			{
-				test: /\.(json|xml|txt)$/,
+				test: /\.(xml|txt)$/,
 				use: {
 					loader: 'file-loader',
 					options: {

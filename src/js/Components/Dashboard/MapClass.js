@@ -1,5 +1,12 @@
 import * as stat from './const';
-import COST_PER_KM from './const';
+import {COST_PER_KM, COST_BUSY_PER_KM, COST_OFFCITY_PER_KM} from './const';
+
+let areas = [
+    require("assets/area-1.json"),
+    require("assets/area-2.json"),
+    require("assets/area-3.json"),
+    require("assets/area-4.json")
+];
 
 require("babel-polyfill");
 
@@ -30,6 +37,8 @@ class MapController{
                 inMove: require('assets/target.png')
             }
         }
+
+        this.areas = [];
     }
 
     animateMove(){
@@ -181,6 +190,16 @@ class MapController{
             mapTypeControl: false
         });
 
+        this.areas = areas.map( (areaOpt) => {
+            let area = new this.googleMaps.Polygon({
+                paths: areaOpt.paths,
+                ...areaOpt.style
+            });
+            area.setMap(this.map);
+
+            return area;
+        } );
+
         setInterval(this.animateMove.bind(this), 2000);
     }
 
@@ -264,7 +283,7 @@ class MapController{
             origin: auto.coords,
             destination: curOrder.coords,
             travelMode: 'DRIVING'
-        }, function(response, status) {
+        }, (response, status) => {
             if (status === 'OK') {
                 //change auto
                 auto.inMove = true;
@@ -272,6 +291,31 @@ class MapController{
                 auto.path.loaded = true;
 
                 pathInfo.directionRenderer.setDirections(response);
+
+                let curArea = this.areas.find( (area) => {
+                        return this.googleMaps.geometry.poly.containsLocation(curOrder.coords, area);
+                    } );
+
+                let tax = curArea ?
+                    (
+                        this.auto.reduce(
+                            (a, b) =>
+                                this.googleMaps.geometry.poly.containsLocation(
+                                    new this.googleMaps.LatLng(b.coords), curArea
+                                ) ? a + 1 : a, 0
+                        ) < 10 ?
+                            COST_BUSY_PER_KM
+                            :
+                            COST_PER_KM
+                    )
+                    :
+                    COST_OFFCITY_PER_KM;
+
+                auto.tax = tax;
+
+                this.updateAutoData(auto.autoID, {
+                   tax
+                });
             } else
                 alert('Directions request failed due to ' + status);
         });
@@ -295,7 +339,7 @@ class MapController{
         window.onAutoButClick = this.autoButClick.bind(this);
 
         if(auto.orderID && auto.orderID !== '') {
-            let cost = (auto.distance * COST_PER_KM).toFixed(2);
+            let cost = (auto.distance * auto.tax).toFixed(2);
 
             content = `<div>Номер заказа: ${auto.orderID}</div>`;
 
@@ -364,7 +408,7 @@ class MapController{
             .then( () =>
                 this.updateOrderData(order.orderID, {
                     status: stat.ORDER_FINISHED,
-                    price: (auto.distance * COST_PER_KM).toFixed(2),
+                    price: (auto.distance * auto.tax).toFixed(2),
                     orderFinished: +new Date()
                 })
             )
