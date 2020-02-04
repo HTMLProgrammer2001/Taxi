@@ -36,7 +36,7 @@ class MapController{
                 inWait: require('assets/peopleBusy.png'),
                 inMove: require('assets/target.png')
             }
-        }
+        };
 
         this.areas = [];
     }
@@ -186,7 +186,7 @@ class MapController{
     createMap(mapElement) {
         this.map = new this.googleMaps.Map(mapElement, {
             center: { lat: 46.65, lng: 32.58 },
-            zoom: 15,
+            zoom: 12,
             mapTypeControl: false
         });
 
@@ -199,6 +199,8 @@ class MapController{
 
             return area;
         } );
+
+        this.makeAreaControl();
 
         setInterval(this.animateMove.bind(this), 2000);
     }
@@ -252,7 +254,7 @@ class MapController{
         //show message window
         autoInfo.marker.addListener('click', this.autoMarkerClick.bind(this, autoInfo));
 
-        if(autoInfo.orderID && autoInfo.orderID !== '' && stat.AUTO_PAY !== autoInfo.status)
+        if(autoInfo.orderID && stat.AUTO_PAY !== autoInfo.status)
             this.createPath(autoInfo);
 
         this.auto.push(autoInfo);
@@ -292,24 +294,11 @@ class MapController{
 
                 pathInfo.directionRenderer.setDirections(response);
 
-                let curArea = this.areas.find( (area) => {
-                        return this.googleMaps.geometry.poly.containsLocation(curOrder.coords, area);
-                    } );
+                //select tax of order
+                if(auto.tax)
+                    return;
 
-                let tax = curArea ?
-                    (
-                        this.auto.reduce(
-                            (a, b) =>
-                                this.googleMaps.geometry.poly.containsLocation(
-                                    new this.googleMaps.LatLng(b.coords), curArea
-                                ) ? a + 1 : a, 0
-                        ) < 10 ?
-                            COST_BUSY_PER_KM
-                            :
-                            COST_PER_KM
-                    )
-                    :
-                    COST_OFFCITY_PER_KM;
+                let tax = this.selectTax(curOrder.coords);
 
                 auto.tax = tax;
 
@@ -403,7 +392,8 @@ class MapController{
         this.updateAutoData(auto.autoID, {
             status: stat.AUTO_FREE,
             orderID: '',
-            distance: 0
+            distance: 0,
+            tax: ''
         })
             .then( () =>
                 this.updateOrderData(order.orderID, {
@@ -416,6 +406,7 @@ class MapController{
                 //update local info
 
                 auto.orderID = '';
+                auto.tax = null;
                 auto.distance = 0;
                 auto.inMove = false;
                 auto.status = stat.AUTO_FREE;
@@ -571,6 +562,29 @@ class MapController{
         return this.dbInfo.child('orders/' + orderID).update(data);
     }
 
+    selectTax(address){
+        let curArea = this.areas.find( (area) => {
+            return this.googleMaps.geometry.poly.containsLocation(address, area);
+        } );
+
+        let tax = curArea ?
+            (
+                this.auto.reduce(
+                    (a, b) =>
+                        this.googleMaps.geometry.poly.containsLocation(
+                            new this.googleMaps.LatLng(b.coords), curArea
+                        ) ? a + 1 : a, 0
+                ) < 10 ?
+                    COST_BUSY_PER_KM
+                    :
+                    COST_PER_KM
+            )
+            :
+            COST_OFFCITY_PER_KM;
+
+        return tax;
+    }
+
     static makeBut(type, nomer, text){
         return `<div 
                     onclick = "onAutoButClick(event)"
@@ -579,6 +593,38 @@ class MapController{
                     data-nomer = ${nomer}>
                         ${text}
                     </div>`;
+    }
+
+    makeAreaControl(){
+        let wrapper = document.createElement('div'),
+            inputWrap = document.createElement('div'),
+            check = document.createElement('input'),
+            label = document.createElement('label');
+
+        wrapper.append(inputWrap);
+        inputWrap.append(check, label);
+
+        wrapper.className = 'p-3 bg-white';
+        inputWrap.className = 'custom-control custom-checkbox';
+
+        check.className = 'custom-control-input';
+        check.style.zIndex = 999;
+        check.type = 'checkbox';
+        check.name = 'showAreas';
+        check.onchange = () => {
+            this.areas.forEach( (area) => {
+                area.setMap(area.map ? null : this.map);
+            } );
+        };
+
+        label.className = 'custom-control-label';
+        label.setAttribute('for', 'showAreas');
+        label.textContent = 'Скрыть районы';
+
+        this.map.controls[this.googleMaps.ControlPosition.TOP_RIGHT].push(wrapper);
+
+        return wrapper;
+
     }
 
 }
