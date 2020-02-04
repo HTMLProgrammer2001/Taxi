@@ -8,6 +8,13 @@ class HistoryList extends React.Component{
         this.props.loadOrders();
     }
 
+    DateConvert(key, value){
+            if(['orderCreate', 'orderAccept', 'orderFinished'].includes(key))
+                return (new Date(value)).toLocaleString();
+
+            return value;
+    }
+
     render(){
         if(this.props.historyOrders.loading)
             return <div>Загрузка данных...</div>;
@@ -16,12 +23,31 @@ class HistoryList extends React.Component{
             return <div className="text-danger">Ошибка загрузки заказов: {error.message}</div>;
 
         if(!this.props.historyOrders.val.length)
-            return <div>Записей по данному фильтру не найдено.</div>
+            return <div>Записей по данному фильтру не найдено.</div>;
 
-        return this.props.historyOrders.val.map(
-            (order) =>
-                <HistoryItem order = {order} key = {order.orderID}/>
+        let stringifyOrder = JSON.stringify(this.props.historyOrders.val, this.DateConvert);
+
+        return (
+            <div>
+                <div className = "row d-flex">
+                    <a href={`http://taxi/api/excel.php?orders=${stringifyOrder}`}>
+                        <div className = "btn btn-primary m-3">Excel</div>
+                    </a>
+                    <a href={`http://taxi/api/pdf.php?orders=${stringifyOrder}`}>
+                        <div className = "btn btn-primary m-3">PDF</div>
+                    </a>
+                </div>
+
+                {
+                    this.props.historyOrders.val.map(
+                        (order) =>
+                            <HistoryItem order = {order} key = {order.orderID}/>
+                    )
+                }
+            </div>
         );
+
+        return
     }
 }
 
