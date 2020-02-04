@@ -1,0 +1,14 @@
+{
+    "name": "taxi/main",
+    "description": "Taxi site",
+    "authors": [
+        {
+            "name": "HTMLProgrammer2001",
+            "email": "cssuperpy@gmail.com"
+        }
+    ],
+    "require": {
+        "phpoffice/phpexcel": "^1.8",
+        "docnet/tfpdf": "^2.2"
+    }
+}

@@ -1,5 +1,5 @@
 <?php
-require_once 'Classes\PHPExcel.php';
+require_once '..\vendor\autoload.php';
 
 $columns = ['ID', 'UserID', 'AutoID', 'From', 'Destination', 'Status', 'Order created', 'Order accepted', 'Order finished', 'Price'];
 $records = json_decode($_GET['orders'], true);

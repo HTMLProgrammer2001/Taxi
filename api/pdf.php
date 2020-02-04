@@ -1,5 +1,5 @@
 <?php
-require_once 'tfpdf\tfpdf.php';
+require_once '..\vendor\autoload.php';
 
 $columns = ['ID', 'UserID', 'AutoID', 'From', 'Destination', 'Status', 'Order created', 'Order accepted', 'Order finished', 'Price'];
 $records = json_decode($_GET['orders'], true);
@@ -27,7 +27,7 @@ foreach ($records as &$record){
     $record = array_merge($example, $record);
 }
 
-class PDF extends tFPDF
+class PDF extends tFPDF\PDF
 {
 
 // Simple table
@@ -53,9 +53,11 @@ class PDF extends tFPDF
 }
 
 $pdf = new PDF();
-$pdf->AddFont('DejaVu','','DejaVuSansCondensed.ttf',true);
-$pdf->SetFont('DejaVu','',14);
+$pdf->AddFont('DejaVuSansCondensed','','DejaVuSansCondensed.ttf',true);
+$pdf->SetFont('DejaVuSansCondensed','',14);
 $pdf->AddPage("L");
 $pdf->BasicTable($columns, $records);
 $pdf->SetAutoPageBreak(true);
-$pdf->Output();
+
+header('Content-Type: application/pdf');
+echo $pdf->output();

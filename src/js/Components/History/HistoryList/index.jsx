@@ -33,7 +33,7 @@ class HistoryList extends React.Component{
                     <a href={`http://taxi/api/excel.php?orders=${stringifyOrder}`}>
                         <div className = "btn btn-primary m-3">Excel</div>
                     </a>
-                    <a href={`http://taxi/api/pdf.php?orders=${stringifyOrder}`}>
+                    <a href={`http://taxi/api/pdf.php?orders=${stringifyOrder}`} target={"_blank"}>
                         <div className = "btn btn-primary m-3">PDF</div>
                     </a>
                 </div>
@@ -56,7 +56,7 @@ let stateToProps = (state) => {
 
     //check auto
     orders = orders.filter( (ord) => {
-        return state.history.form.driver === '' || state.history.form.driver === ord.autoID;
+        return state.history.form.driver === '' || +state.history.form.driver === +ord.autoID;
     } );
 
     //check date
