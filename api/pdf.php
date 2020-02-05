@@ -1,8 +1,14 @@
 <?php
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: PUT, GET, PATCH, POST, DELETE');
+header('Access-Control-Allow-Headers: Content-Type, Origin');
+header('Access-Control-Expose-Headers: Content-Type, Origin');
+header('Content-Type: application/pdf');
+
 require_once '..\vendor\autoload.php';
 
 $columns = ['ID', 'UserID', 'AutoID', 'From', 'Destination', 'Status', 'Order created', 'Order accepted', 'Order finished', 'Price'];
-$records = json_decode($_GET['orders'], true);
+$records = json_decode($_POST['orders'], true);
 $example = [
     'orderID' => '',
     'user' => '',
@@ -59,5 +65,4 @@ $pdf->AddPage("L");
 $pdf->BasicTable($columns, $records);
 $pdf->SetAutoPageBreak(true);
 
-header('Content-Type: application/pdf');
 echo $pdf->output();

@@ -15,27 +15,61 @@ class HistoryList extends React.Component{
             return value;
     }
 
-    render(){
-        if(this.props.historyOrders.loading)
-            return <div>Загрузка данных...</div>;
+    fetchDate(type){
+        let orders = JSON.stringify(this.props.historyOrders.val, this.DateConvert);
 
-        if(this.props.historyOrders.error)
-            return <div className="text-danger">Ошибка загрузки заказов: {error.message}</div>;
+        switch(type){
+            case 'Excel':
+                fetch('http://taxi/api/excel.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    mode: 'cors',
+                    body: `orders=${orders}`
+                }).then( (res)=> {
+                    res.blob().then( (file) => {
+                        let a = document.createElement('a');
+                        a.href = URL.createObjectURL(file);
+                        a.download = 'history' + +new Date() + '.xlsx';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    } );
+                } );
+                break;
+            case 'PDF':
+                fetch('http://taxi/api/pdf.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    mode: 'cors',
+                    body: `orders=${orders}`
+                }).then( (res)=> {
+                    res.blob().then( (file) => {
+                        let a = document.createElement('a');
+                        a.href = URL.createObjectURL(file);
+                        a.download = 'history' + +new Date() + '.pdf';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    } );
+                } );
+        }
+    }
+
+    render(){
 
         if(!this.props.historyOrders.val.length)
             return <div>Записей по данному фильтру не найдено.</div>;
 
-        let stringifyOrder = JSON.stringify(this.props.historyOrders.val, this.DateConvert);
-
         return (
             <div>
                 <div className = "row d-flex">
-                    <a href={`http://taxi/api/excel.php?orders=${stringifyOrder}`}>
-                        <div className = "btn btn-primary m-3">Excel</div>
-                    </a>
-                    <a href={`http://taxi/api/pdf.php?orders=${stringifyOrder}`} target={"_blank"}>
-                        <div className = "btn btn-primary m-3">PDF</div>
-                    </a>
+                    <div className = "btn btn-primary m-3" onClick={() => this.fetchDate('Excel')}>Excel</div>
+
+                    <div className = "btn btn-primary m-3" onClick={() => this.fetchDate('PDF')}>PDF</div>
                 </div>
 
                 {
@@ -46,8 +80,6 @@ class HistoryList extends React.Component{
                 }
             </div>
         );
-
-        return
     }
 }
 
@@ -106,7 +138,7 @@ let loadData = () => {
 
         firebaseProj.database().ref("/orders").on('child_removed', (snap) => {
             dispatch(
-                creators.historyOrderAdd(snap.key)
+                creators.historyOrderRemove(snap.key)
             );
         });
     }
