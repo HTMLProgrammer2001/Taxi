@@ -6,7 +6,30 @@ let areas = [
     require("assets/area-2.json"),
     require("assets/area-3.json"),
     require("assets/area-4.json")
-];
+],
+
+    autoPoints = [
+        {
+            "lat" : 46.6716677,
+            "lng" : 32.6389526
+        },
+        {
+            "lat" : 46.66058779999999,
+            "lng" : 32.6554837
+        },
+        {
+            "lat" : 46.6625253,
+            "lng" : 32.6390332
+        },
+        {
+            "lat" : 46.654205,
+            "lng" : 32.5625972
+        },
+        {
+            "lat" : 46.6518956,
+            "lng" : 32.6144419
+        }
+    ];
 
 require("babel-polyfill");
 
@@ -34,113 +57,119 @@ class MapController{
             order: {
                 free: require('assets/peopleFree.png'),
                 inWait: require('assets/peopleBusy.png'),
-                inMove: require('assets/target.png')
+                withOrder: require('assets/target.png')
             }
         };
 
         this.areas = [];
     }
 
+    animateChange(car, curOrder){
+        //if we arrived to order
+        if(curOrder.status === stat.ORDER_WAIT){
+
+            car.status = stat.AUTO_WAIT;
+            car.path.loaded = false;
+            car.marker.setIcon(this.icons.car.wait);
+
+            curOrder.status = stat.ORDER_AUTO;
+            curOrder.marker.setMap(null);
+
+            //update data in db
+            this.updateAutoData(car.autoID, {
+                status: stat.AUTO_WAIT
+            })
+                .then( () =>
+                    this.updateOrderData(curOrder.orderID, {
+                        status: stat.ORDER_AUTO
+                    })
+                );
+        }
+        else if(curOrder.status === stat.ORDER_MOVE){
+            car.withOrder = false;
+
+            curOrder.status = stat.ORDER_PAY;
+            car.status = stat.AUTO_PAY;
+
+            curOrder.marker.setMap(null);
+            car.marker.setIcon(this.icons.car.wait);
+
+            //update info in db
+            this.updateAutoData(car.autoID, {
+                status: stat.AUTO_PAY
+            })
+                .then( () =>
+                    this.updateOrderData(curOrder.orderID, {
+                        status: stat.ORDER_PAY
+                    })
+                );
+
+            return true;
+        }
+    }
+
+    findNewPoint(curCoords, steps, speed = 0.01){
+        let newCoords = {lat: curCoords.lat, lng: curCoords.lng};
+
+        while(speed > 0){
+
+            if(!steps.length)
+                break;
+
+            let nextStep = steps[0].end_point,
+                distance = Math.sqrt((curCoords.lat - nextStep.lat())**2 + (curCoords.lng - nextStep.lng())**2);
+
+            if(distance > speed){
+                newCoords = nextStep;
+
+                //check all paths in this step
+                for(let i = 0; i < car.path.steps[0].path.length; i++){
+                    let point = steps[0].path[i],
+                        pointDistance = Math.sqrt((curCoords.lat - point.lat())**2 + (curCoords.lng - point.lng())**2);
+
+                    if(pointDistance > speed){
+                        newCoords = {
+                            lat: steps[0].path[i].lat(),
+                            lng: steps[0].path[i].lng()
+                        };
+
+                        break;
+                    }
+                }
+
+                speed = 0;
+            }
+            else{
+                newCoords = {
+                    lat: nextStep.lat(),
+                    lng: nextStep.lng()
+                };
+
+                speed -= distance;
+
+                steps.shift();
+            }
+        }
+
+        return newCoords;
+    }
+
     animateMove(){
         this.auto.forEach( (car) => {
-           if(!car.inMove)
+           if(!car.withOrder)
                return;
 
-           let autoCoords = car.coords,
-
             //find order
-            curOrder = this.orders.find( (order) => {
+            let curOrder = this.orders.find( (order) => {
                 return order.orderID === car.orderID;
             });
 
            //arrived
-           if((!car.path.steps.length || !car.path.steps[0].distance.value) && car.path.loaded){
-
-               //if we arrived to order
-               if(curOrder.status === stat.ORDER_WAIT){
-
-                   car.status = stat.AUTO_WAIT;
-                   car.path.loaded = false;
-                   car.marker.setIcon(this.icons.car.wait);
-
-                   curOrder.status = stat.ORDER_AUTO;
-                   curOrder.marker.setMap(null);
-
-                   //update data in db
-                   this.updateAutoData(car.autoID, {
-                       status: stat.AUTO_WAIT
-                   })
-                       .then( () =>
-                           this.updateOrderData(curOrder.orderID, {
-                               status: stat.ORDER_AUTO
-                           })
-                       );
-               }
-               else if(curOrder.status === stat.ORDER_MOVE){
-                   car.inMove = false;
-
-                   curOrder.status = stat.ORDER_PAY;
-                   car.status = stat.AUTO_PAY;
-
-                   curOrder.marker.setMap(null);
-                   car.marker.setIcon(this.icons.car.wait);
-
-                   //update info in db
-                   this.updateAutoData(car.autoID, {
-                       status: stat.AUTO_PAY
-                   })
-                       .then( () =>
-                           this.updateOrderData(curOrder.orderID, {
-                               status: stat.ORDER_PAY
-                           })
-                       );
-
+           if((!car.path.steps.length || !car.path.steps[0].distance.value) && car.path.loaded)
+               if(this.animateChange(car, curOrder))
                    return;
-               }
-           }
 
-           let speed = 0.01,
-               newCoords = {lat: autoCoords.lat, lng: autoCoords.lng};
-
-           while(speed > 0){
-
-               if(!car.path.steps.length)
-                   break;
-
-               let nextStep = car.path.steps[0].end_point,
-                   distance = Math.sqrt((autoCoords.lat - nextStep.lat())**2 + (autoCoords.lng - nextStep.lng())**2);
-
-               if(distance > speed){
-                   newCoords = nextStep;
-
-                   //check all paths in this step
-                   for(let i = 0; i < car.path.steps[0].path.length; i++){
-                       let point = car.path.steps[0].path[i],
-                           pointDistance = Math.sqrt((autoCoords.lat - point.lat())**2 + (autoCoords.lng - point.lng())**2);
-
-                       if(pointDistance > speed){
-                           newCoords = {
-                               lat: car.path.steps[0].path[i].lat(),
-                               lng: car.path.steps[0].path[i].lng()
-                           };
-
-                           break;
-                       }
-                   }
-
-                   speed = 0;
-               }
-               else{
-                   newCoords = {
-                       lat: nextStep.lat(),
-                       lng: nextStep.lng()
-                   };
-
-                   speed -= distance;
-
-                   car.path.steps.shift();
-               }
-           }
+           let newCoords = this.findNewPoint(curOrder, car.path.steps);
 
            if(curOrder.status === stat.ORDER_MOVE)
                car.distance += this.googleMaps.geometry.spherical.computeDistanceBetween(
@@ -160,7 +189,6 @@ class MapController{
             if([stat.AUTO_PAY, stat.AUTO_WAIT, stat.AUTO_FREE].includes(car.status))
                 return;
 
-
             car.path.directionServ.route({
                 origin: car.coords,
                 destination: car.path.dest,
@@ -168,9 +196,7 @@ class MapController{
             }, function(response, status) {
                 if (status === 'OK') {
                     //change auto
-
                     car.path.steps = response.routes[0].legs[0].steps;
-
                     car.path.directionRenderer.setDirections(response);
 
                     if(car.path.steps[0].distance.value)
@@ -217,7 +243,7 @@ class MapController{
         if([stat.ORDER_WAIT, stat.ORDER_AUTO].includes(orderInfo.status))
             icon = this.icons.order.inWait;
         else if(orderInfo.status !== stat.ORDER_FREE){
-            icon = this.icons.order.inMove;
+            icon = this.icons.order.withOrder;
             address = orderInfo.destination;
         }
 
@@ -288,7 +314,7 @@ class MapController{
         }, (response, status) => {
             if (status === 'OK') {
                 //change auto
-                auto.inMove = true;
+                auto.withOrder = true;
                 auto.path.steps = response.routes[0].legs[0].steps;
                 auto.path.loaded = true;
 
@@ -408,7 +434,7 @@ class MapController{
                 auto.orderID = '';
                 auto.tax = null;
                 auto.distance = 0;
-                auto.inMove = false;
+                auto.withOrder = false;
                 auto.status = stat.AUTO_FREE;
                 auto.path = {};
 
@@ -436,7 +462,7 @@ class MapController{
                 .then( () => {
                     order.marker.setPosition(res[0].geometry.location);
                     order.marker.setMap(this.map);
-                    order.marker.setIcon(this.icons.order.inMove);
+                    order.marker.setIcon(this.icons.order.withOrder);
 
                     auto.path.dest = res[0].geometry.location;
                     auto.path.loaded = false;
@@ -474,7 +500,7 @@ class MapController{
                 orderInfo.messageWindow.setContent(this.createContentForOrder(orderInfo));
 
                 //change auto properties
-                this.selectedAuto.inMove = true;
+                this.selectedAuto.withOrder = true;
                 this.selectedAuto.orderID = orderInfo.orderID;
                 this.selectedAuto.status = stat.AUTO_ORDER;
                 this.selectedAuto.messageWindow.setContent(this.createContentForAuto(this.selectedAuto));
