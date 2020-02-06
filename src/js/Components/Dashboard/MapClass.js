@@ -66,6 +66,17 @@ class MapController{
 
     animateChange(car, curOrder){
         //if we arrived to order
+        if(!car.withOrder){
+            let dest = autoPoints[Math.round(Math.random() * autoPoints.length)];
+
+            while(dest == car.path.coords)
+                dest = autoPoints[Math.round(Math.random() * autoPoints.length)];
+
+            car.path.dest = dest;
+
+            return;
+        }
+
         if(curOrder.status === stat.ORDER_WAIT){
 
             car.status = stat.AUTO_WAIT;
@@ -123,7 +134,7 @@ class MapController{
                 newCoords = nextStep;
 
                 //check all paths in this step
-                for(let i = 0; i < car.path.steps[0].path.length; i++){
+                for(let i = 0; i < steps[0].path.length; i++){
                     let point = steps[0].path[i],
                         pointDistance = Math.sqrt((curCoords.lat - point.lat())**2 + (curCoords.lng - point.lng())**2);
 
@@ -156,22 +167,21 @@ class MapController{
 
     animateMove(){
         this.auto.forEach( (car) => {
-           if(!car.withOrder)
-               return;
-
             //find order
             let curOrder = this.orders.find( (order) => {
                 return order.orderID === car.orderID;
             });
 
            //arrived
-           if((!car.path.steps.length || !car.path.steps[0].distance.value) && car.path.loaded)
+           if((car.path && car.path.steps && (!car.path.steps.length || !car.path.steps[0].distance.value)) && car.path.loaded)
                if(this.animateChange(car, curOrder))
                    return;
 
-           let newCoords = this.findNewPoint(curOrder, car.path.steps);
+               let newCoords = car.coords;
+               if(car.path && car.path.steps)
+                newCoords = this.findNewPoint(car.coords, car.path.steps);
 
-           if(curOrder.status === stat.ORDER_MOVE)
+           if(car.withOrder && curOrder.status === stat.ORDER_MOVE)
                car.distance += this.googleMaps.geometry.spherical.computeDistanceBetween(
                    new this.googleMaps.LatLng(car.coords.lat, car.coords.lng),
                    new this.googleMaps.LatLng(newCoords.lat, newCoords.lng)
@@ -186,8 +196,10 @@ class MapController{
                distance: car.distance
             });
 
-            if([stat.AUTO_PAY, stat.AUTO_WAIT, stat.AUTO_FREE].includes(car.status))
+            if([stat.AUTO_PAY, stat.AUTO_WAIT].includes(car.status))
                 return;
+
+            console.log(car);
 
             car.path.directionServ.route({
                 origin: car.coords,
@@ -198,6 +210,9 @@ class MapController{
                     //change auto
                     car.path.steps = response.routes[0].legs[0].steps;
                     car.path.directionRenderer.setDirections(response);
+                    car.path.directionRenderer.setOptions({
+                        suppressPolylines: !car.withOrder
+                    });
 
                     if(car.path.steps[0].distance.value)
                         car.path.loaded = true;
@@ -280,8 +295,21 @@ class MapController{
         //show message window
         autoInfo.marker.addListener('click', this.autoMarkerClick.bind(this, autoInfo));
 
-        if(autoInfo.orderID && stat.AUTO_PAY !== autoInfo.status)
-            this.createPath(autoInfo);
+        if(!autoInfo.orderID){
+            let dest = autoPoints[Math.round(Math.random() * autoPoints.length)];
+            this.createPath(autoInfo, dest);
+        }
+        else
+            if(autoInfo.orderID && stat.AUTO_PAY !== autoInfo.status) {
+                //find destination order
+                let curOrder = this.orders.find( (e) => {
+                    return e.orderID === autoInfo.orderID;
+                });
+
+                autoInfo.withOrder = true;
+
+                this.createPath(autoInfo, curOrder.coords);
+            }
 
         this.auto.push(autoInfo);
     }
@@ -292,13 +320,10 @@ class MapController{
         });
     }
 
-    createPath(auto){
-        //find destination order
-        let curOrder = this.orders.find( (e) => {
-            return e.orderID === auto.orderID;
-        }),
+    createPath(auto, dest){
         //create  path
-        pathInfo = {dest: curOrder.coords};
+        let
+            pathInfo = {dest: dest};
 
         pathInfo.directionServ = new this.googleMaps.DirectionsService;
         pathInfo.directionRenderer = new this.googleMaps.DirectionsRenderer({
@@ -306,15 +331,17 @@ class MapController{
             suppressMarkers: true,
             preserveViewport: true
         });
+        pathInfo.directionRenderer.setOptions({
+            suppressPolylines: !auto.withOrder
+        });
 
         pathInfo.directionServ.route({
             origin: auto.coords,
-            destination: curOrder.coords,
+            destination: dest,
             travelMode: 'DRIVING'
         }, (response, status) => {
             if (status === 'OK') {
                 //change auto
-                auto.withOrder = true;
                 auto.path.steps = response.routes[0].legs[0].steps;
                 auto.path.loaded = true;
 
@@ -324,7 +351,7 @@ class MapController{
                 if(auto.tax)
                     return;
 
-                let tax = this.selectTax(curOrder.coords);
+                let tax = this.selectTax(dest);
 
                 auto.tax = tax;
 
@@ -352,6 +379,9 @@ class MapController{
 
         //button start travel handler
         window.onAutoButClick = this.autoButClick.bind(this);
+
+        if(this.selectedAuto == auto)
+            return '<div>Выберите заказ</div>';
 
         if(auto.orderID && auto.orderID !== '') {
             let cost = (auto.distance * auto.tax).toFixed(2);
@@ -436,7 +466,6 @@ class MapController{
                 auto.distance = 0;
                 auto.withOrder = false;
                 auto.status = stat.AUTO_FREE;
-                auto.path = {};
 
                 auto.marker.setIcon(this.icons.car.free);
 
@@ -500,15 +529,25 @@ class MapController{
                 orderInfo.messageWindow.setContent(this.createContentForOrder(orderInfo));
 
                 //change auto properties
-                this.selectedAuto.withOrder = true;
-                this.selectedAuto.orderID = orderInfo.orderID;
-                this.selectedAuto.status = stat.AUTO_ORDER;
-                this.selectedAuto.messageWindow.setContent(this.createContentForAuto(this.selectedAuto));
-                this.selectedAuto.messageWindow.close();
+                let index = this.auto.findIndex((e) => e == this.selectedAuto),
+                    newAuto = {
+                        coords: this.auto[index].coords,
+                        status: stat.AUTO_ORDER,
+                        autoID: this.auto[index].autoID,
+                        orderID: orderInfo.orderID,
+                        nomer: this.auto[index].nomer,
+                        name: this.auto[index].name,
+                        distance: 0
+                    };
+
+                this.auto[index].marker.setMap(null);
+                this.auto.splice(index, 1);
+
+                this.createAuto(newAuto);
 
                 //save database
                 this.updateOrderData(orderInfo.orderID, {
-                   autoID: this.selectedAuto.autoID,
+                   autoID: newAuto.autoID,
                    status: stat.ORDER_WAIT,
                     orderAccept: +new Date()
                 })
@@ -546,7 +585,7 @@ class MapController{
 
             let
             order = this.orders.find( (elem) => {
-                return elem.orderID === auto.orderID;
+                return elem.orderID == auto.orderID;
             });
 
         if(type === stat.EVENT_TRAVEL) {
