@@ -29,7 +29,6 @@ foreach ($records as &$record){
     return in_array($e, array_keys($example));
   }, ARRAY_FILTER_USE_KEY);
 
-
   $record = array_merge($example, $record);
 }
 

@@ -17,6 +17,13 @@ class OrderForm extends React.Component{
     }
 
     render(){
+        //account aren't verified
+        if(!firebaseProj.auth().currentUser.emailVerified)
+            return (
+                <div className="text-center text-danger">
+                    Только пользователи с верифицированным аккаунтом могут делать заказы.
+                </div>
+            );
 
         return (
             <form onSubmit={this.addOrder} className="w-50 align-items-center d-flex flex-column">
@@ -28,7 +35,7 @@ class OrderForm extends React.Component{
                     null
                 }
 
-                <h3 className="text-center">Добавить заказ</h3>
+                <h4 className="text-center">Добавить заказ</h4>
 
                 <input
                     type="text"

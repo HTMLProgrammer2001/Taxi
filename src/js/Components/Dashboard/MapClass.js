@@ -119,7 +119,7 @@ class MapController{
         }
     }
 
-    findNewPoint(curCoords, steps, speed = 0.01){
+    findNewPoint(curCoords, steps, speed = 0.001){
         let newCoords = {lat: curCoords.lat, lng: curCoords.lng};
 
         while(speed > 0){
@@ -199,8 +199,6 @@ class MapController{
             if([stat.AUTO_PAY, stat.AUTO_WAIT].includes(car.status))
                 return;
 
-            console.log(car);
-
             car.path.directionServ.route({
                 origin: car.coords,
                 destination: car.path.dest,
@@ -243,7 +241,7 @@ class MapController{
 
         this.makeAreaControl();
 
-        setInterval(this.animateMove.bind(this), 2000);
+        setInterval(this.animateMove.bind(this), 5000);
     }
 
     async createOrder(orderInfo){

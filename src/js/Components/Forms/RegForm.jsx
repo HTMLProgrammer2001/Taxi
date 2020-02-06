@@ -106,7 +106,6 @@ class RegistryForm extends React.Component{
 
         //create user
         this.createUser();
-
     }
 
     testForm(){
@@ -143,7 +142,7 @@ class RegistryForm extends React.Component{
                     registrationError: ''
                 });
 
-                return user.sendEmailVerification();
+                return firebaseProj.auth().currentUser.sendEmailVerification();
             })
             .catch( (error) => {
                 //redraw component to display errors

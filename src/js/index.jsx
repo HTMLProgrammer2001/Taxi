@@ -14,7 +14,7 @@ import {composeWithDevTools} from 'redux-devtools-extension';
 
 //myComponents
 const Forms = React.lazy( () => import('./Components/Forms/') );
-const Profile = React.lazy( () => import('./Components/Profile') );
+const Profile = React.lazy( () => import('./Components/Profile/') );
 const Dashboard = React.lazy( () => import('./Components/Dashboard/') );
 const History = React.lazy( () => import('./Components/History/') );
 
