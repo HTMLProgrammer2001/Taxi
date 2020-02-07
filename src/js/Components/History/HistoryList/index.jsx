@@ -119,6 +119,9 @@ let loadData = () => {
 
         //real time update
         firebaseProj.database().ref("/orders").on('child_changed', (snap) => {
+            if(snap.val().user !== firebaseProj.auth().currentUser.uid)
+                return;
+
             dispatch(
                 creators.historyOrderChange({
                     orderID: snap.key,
@@ -128,6 +131,9 @@ let loadData = () => {
         });
 
         firebaseProj.database().ref("/orders").on('child_added', (snap) => {
+            if(snap.val().user !== firebaseProj.auth().currentUser.uid)
+                return;
+
             dispatch(
                 creators.historyOrderAdd({
                     orderID: snap.key,
@@ -137,6 +143,9 @@ let loadData = () => {
         });
 
         firebaseProj.database().ref("/orders").on('child_removed', (snap) => {
+            if(snap.val().user !== firebaseProj.auth().currentUser.uid)
+                return;
+
             dispatch(
                 creators.historyOrderRemove(snap.key)
             );

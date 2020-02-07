@@ -214,8 +214,9 @@ class MapController{
 
                     if(car.path.steps[0].distance.value)
                         car.path.loaded = true;
-                } else
-                    alert('Directions request failed due to ' + status);
+                }
+                //else
+                    //alert('Directions request failed due to ' + status);
             });
 
             car.messageWindow.setContent(this.createContentForAuto(car));
@@ -356,8 +357,9 @@ class MapController{
                 this.updateAutoData(auto.autoID, {
                    tax
                 });
-            } else
-                alert('Directions request failed due to ' + status);
+            }
+            //else
+            //  alert('Directions request failed due to ' + status);
         });
 
         auto.path = pathInfo;
@@ -637,7 +639,7 @@ class MapController{
                         this.googleMaps.geometry.poly.containsLocation(
                             new this.googleMaps.LatLng(b.coords), curArea
                         ) ? a + 1 : a, 0
-                ) < 10 ?
+                ) < 3 ?
                     COST_BUSY_PER_KM
                     :
                     COST_PER_KM
