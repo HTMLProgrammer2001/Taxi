@@ -27,6 +27,7 @@ class ProfileForm extends React.Component{
                     type="text"
                     name = "userName"
                     onInput={this.onFormChange}
+                    value={this.state.fieldsValue.userName}
                     className="form-control"
                     placeholder="Enter new name"/>
 
@@ -60,6 +61,7 @@ class ProfileForm extends React.Component{
                     type="password"
                     name = "userPassword"
                     onInput={this.onFormChange}
+                    value={this.state.fieldsValue.userPassword}
                     className="form-control"
                     placeholder="Enter new password"/>
 
@@ -72,6 +74,7 @@ class ProfileForm extends React.Component{
                     type="password"
                     name = "confirmPassword"
                     onInput={this.onFormChange}
+                    value={this.state.fieldsValue.confirmPassword}
                     className="form-control"
                     placeholder="Confirm new password"/>
 
@@ -120,7 +123,8 @@ class ProfileForm extends React.Component{
 
         //updateUser
         let user = firebaseProj.auth().currentUser,
-            photoURL = '';
+            photoURL = '',
+            name = this.state.fieldsValue.userName ? this.state.fieldsValue.userName : user.displayName;
 
         if(this.state.fieldsValue.userPhoto){
 
@@ -133,12 +137,15 @@ class ProfileForm extends React.Component{
         }
 
         firebaseProj.auth().currentUser.updateProfile({
-            displayName: this.state.fieldsValue.userName,
+            displayName: name,
             photoURL: photoURL
         })
             .then(
                 () => {
-                    return firebaseProj.auth().currentUser.updatePassword(this.state.fieldsValue.userPassword);
+                    if(this.state.fieldsValue.userPassword)
+                        return firebaseProj.auth().currentUser.updatePassword(this.state.fieldsValue.userPassword);
+                    else
+                        return Promise.resolve();
                 }
             )
             .then(
@@ -154,7 +161,7 @@ class ProfileForm extends React.Component{
             .catch( (error) => {
                 //redraw component to display errors
                 this.setState({
-                    registrationError: error.message
+                    updateError: error.message
                 });
             });
     }
@@ -162,10 +169,10 @@ class ProfileForm extends React.Component{
     testForm(){
         let errors = {};
 
-        if(!this.state.fieldsValue.userName)
-            errors.userName = 'Enter your new name';
+        if(this.state.fieldsValue.userName && this.state.fieldsValue.userName < 3)
+            errors.userName = 'Enter your new name(minimum 3 letters)';
 
-        if(!this.state.fieldsValue.userPassword || this.state.fieldsValue.userPassword.length < 8)
+        if(this.state.fieldsValue.userPassword && this.state.fieldsValue.userPassword.length < 8)
             errors.userPassword = 'Minimum password length is 8';
 
         if(this.state.fieldsValue.confirmPassword !== this.state.fieldsValue.userPassword)

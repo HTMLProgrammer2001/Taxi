@@ -23,6 +23,7 @@ class AuthForm extends React.Component{
                     type="email"
                     name = "userEmail"
                     onInput={this.onFieldChange}
+                    value = {this.state.fieldsValue.userEmail}
                     className="form-control"
                     placeholder="Enter email"/>
 
@@ -34,6 +35,7 @@ class AuthForm extends React.Component{
                     type="password"
                     name = "userPassword"
                     onInput={this.onFieldChange}
+                    value = {this.state.fieldsValue.userPassword}
                     className="form-control"
                     placeholder="Enter password"/>
 

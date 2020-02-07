@@ -24,6 +24,7 @@ class RegistryForm extends React.Component{
                     type="email"
                     name = "userEmail"
                     onInput={this.onFormChange}
+                    value = {this.state.fieldsValue.userEmail}
                     className="form-control"
                     placeholder="Enter email"/>
 
@@ -36,6 +37,7 @@ class RegistryForm extends React.Component{
                     type="text"
                     name = "userName"
                     onInput={this.onFormChange}
+                    value = {this.state.fieldsValue.userName}
                     className="form-control"
                     placeholder="Enter name"/>
 
@@ -48,6 +50,7 @@ class RegistryForm extends React.Component{
                     type="password"
                     name = "userPassword"
                     onInput={this.onFormChange}
+                    value = {this.state.fieldsValue.userPassword}
                     className="form-control"
                     placeholder="Enter password"/>
 
@@ -60,6 +63,7 @@ class RegistryForm extends React.Component{
                     type="password"
                     name = "confirmPassword"
                     onInput={this.onFormChange}
+                    value = {this.state.fieldsValue.confirmPassword}
                     className="form-control"
                     placeholder="Confirm password"/>
 

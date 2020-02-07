@@ -28,6 +28,30 @@ let areas = [
         {
             "lat" : 46.6518956,
             "lng" : 32.6144419
+        },
+        {
+            "lat" : 46.619408,
+            "lng" : 32.5900442
+        },
+        {
+            "lat" : 46.6264618,
+            "lng" : 32.6073008
+        },
+        {
+            "lat" : 46.662465,
+            "lng" : 32.6058125
+        },
+        {
+            "lat" : 46.6342376,
+            "lng" : 32.5742038
+        },
+        {
+            "lat" : 46.6569232,
+            "lng" : 32.5794143
+        },
+        {
+            "lat" : 46.6177539,
+            "lng" : 32.5787427
         }
     ];
 
@@ -119,7 +143,7 @@ class MapController{
         }
     }
 
-    findNewPoint(curCoords, steps, speed = 0.001){
+    findNewPoint(curCoords, steps, speed = 0.01){
         let newCoords = {lat: curCoords.lat, lng: curCoords.lng};
 
         while(speed > 0){
@@ -567,7 +591,9 @@ class MapController{
     }
 
     autoMarkerClick(autoInfo){
-        if(this.selectedAuto){
+        if(this.selectedAuto === autoInfo)
+            this.selectedAuto = null;
+        else if(this.selectedAuto){
             alert('Выберите заказ или отмените выбор заказа');
             return;
         }
@@ -580,7 +606,7 @@ class MapController{
         let target = event.target,
             type = target.dataset.type,
             auto = this.auto.find((elem) => {
-                return elem.nomer === event.target.dataset.nomer;
+                return elem.nomer == event.target.dataset.nomer;
             });
 
             let

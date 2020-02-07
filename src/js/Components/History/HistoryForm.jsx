@@ -4,6 +4,20 @@ import * as stat from 'js/Components/Dashboard/const';
 import {connect} from 'react-redux';
 
 class HistoryForm extends React.Component{
+    constructor(props){
+        super(props);
+
+        this.state = {auto: []}
+    }
+
+    componentDidMount(){
+        firebaseProj.database().ref('/auto').once('value', (snap) => {
+            this.setState({
+                auto: snap.val()
+            });
+        });
+    }
+
     render(){
         return (
                 <form>
@@ -20,8 +34,12 @@ class HistoryForm extends React.Component{
                             }
                         >
                             <option value = "">All</option>
-                            <option value="0">0</option>
-                            <option value="1">1</option>
+
+                            {
+                                Object.entries(this.state.auto).map(([key, auto]) => {
+                                    return <option value = {key} key = {key}>{auto.name}(ID: {key})</option>;
+                                })
+                            }
                         </select>
                     </div>
 
