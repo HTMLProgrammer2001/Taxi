@@ -1,5 +1,6 @@
 import HistoryItem from './HistoryItem';
 import * as creators from 'js/actionCreators';
+import firebaseProj from 'js/fareConfig';
 
 import {connect} from 'react-redux';
 
@@ -8,7 +9,7 @@ class HistoryList extends React.Component{
         this.props.loadOrders();
     }
 
-    DateConvert(key, value){
+    static DateConvert(key, value){
             if(['orderCreate', 'orderAccept', 'orderFinished'].includes(key))
                 return (new Date(value)).toLocaleString();
 
@@ -16,7 +17,7 @@ class HistoryList extends React.Component{
     }
 
     fetchDate(type){
-        let orders = JSON.stringify(this.props.historyOrders.val, this.DateConvert);
+        let orders = JSON.stringify(this.props.historyOrders.val, HistoryList.DateConvert);
 
         switch(type){
             case 'Excel':
@@ -99,14 +100,14 @@ let stateToProps = (state) => {
 
     //check status
     orders = orders.filter( (ord) => {
-        return !state.history.form.status || ord.status == state.history.form.status;
+        return !state.history.form.status || ord.status === state.history.form.status;
     } );
 
     orders = orders.sort((a, b) => {
        return state.history.form.sortDir === 'ASC' ?
-                a[state.history.form.sortBy] > b[state.history.form.sortBy]
+                a[state.history.form.sortBy] < b[state.history.form.sortBy]
             :
-                a[state.history.form.sortBy] < b[state.history.form.sortBy];
+                a[state.history.form.sortBy] > b[state.history.form.sortBy];
     });
 
     return {

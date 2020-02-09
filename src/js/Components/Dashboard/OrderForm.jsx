@@ -1,4 +1,5 @@
 import {showDangerMessage, showSuccessMessage} from "../../messages";
+import firebaseProj from 'js/fareConfig';
 
 class OrderForm extends React.Component{
     constructor(props){

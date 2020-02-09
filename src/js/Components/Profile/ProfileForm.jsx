@@ -1,5 +1,6 @@
 import UpdateError from "../Forms/Error";
 import {showDangerMessage, showSuccessMessage} from "../../messages";
+import firebaseProj from 'js/fareConfig';
 
 require("bootstrap");
 require("babel-polyfill");

@@ -1,5 +1,6 @@
 import AuthError from './Error';
 import {showDangerMessage} from "../../messages";
+import firebaseProj from 'js/fareConfig';
 
 class AuthForm extends React.Component{
     constructor(props){

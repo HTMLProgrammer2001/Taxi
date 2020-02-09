@@ -1,3 +1,5 @@
+import firebaseProj from 'js/fareConfig';
+
 function UserInfo(){
     let user = firebaseProj.auth().currentUser;
 

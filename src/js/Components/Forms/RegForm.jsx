@@ -1,5 +1,6 @@
 import RegError from './Error';
 import {showDangerMessage} from "../../messages";
+import firebaseProj from 'js/fareConfig';
 
 class RegistryForm extends React.Component{
     constructor(props){
@@ -80,7 +81,6 @@ class RegistryForm extends React.Component{
     }
 
     onFormChange(event){
-
         let tar = event.target;
 
         this.setState(

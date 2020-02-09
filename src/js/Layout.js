@@ -1,5 +1,5 @@
-import Header from "./Components/Header";
-
+import Header from './Components/Header';
+import firebaseProj from 'js/fareConfig';
 
 import 'firebase/auth';
 import 'firebase/database';

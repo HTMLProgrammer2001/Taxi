@@ -1,5 +1,6 @@
 import * as creators from 'js/actionCreators';
 import * as stat from 'js/Components/Dashboard/const';
+import firebaseProj from 'js/fareConfig';
 
 import {connect} from 'react-redux';
 

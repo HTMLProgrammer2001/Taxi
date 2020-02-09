@@ -19,19 +19,19 @@ function onMessage(){
 export const showSuccessMessage = (content) => {
     onMessage();
 
-    message.classList.add('show');
-    message.classList.add('alert-success');
-
     message.querySelector('.img').src = require('assets/success.png');
     message.querySelector('.text').textContent = content;
+
+    message.classList.add('alert-success');
+    message.classList.add('show');
 };
 
 export const showDangerMessage = (content) => {
     onMessage();
 
-    message.classList.add('show');
-    message.classList.add('alert-danger');
-
     message.querySelector('.img').src = require('assets/danger.png');
     message.querySelector('.text').textContent = content;
+
+    message.classList.add('alert-danger');
+    message.classList.add('show');
 };

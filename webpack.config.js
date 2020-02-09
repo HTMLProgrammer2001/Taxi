@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
@@ -18,6 +19,12 @@ let conf = {
 		},
 		hot: true,
 		contentBase: './dist'
+	},
+	optimization: {
+		minimizer: [new UglifyJsPlugin({
+			test: /\.jsx?$/i,
+			exclude: '/node_modules/'
+		})]
 	},
 	module: {
 		rules: [

@@ -1,6 +1,7 @@
 require('babel-polyfill');
 
 import {showDangerMessage, showSuccessMessage} from "../../messages";
+import firebaseProj from 'js/fareConfig';
 
 class UserAva extends React.Component{
     constructor(props){

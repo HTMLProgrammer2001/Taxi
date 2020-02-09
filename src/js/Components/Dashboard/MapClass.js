@@ -1,6 +1,7 @@
 import * as stat from './const';
 import {COST_PER_KM, COST_BUSY_PER_KM, COST_OFFCITY_PER_KM} from './const';
 import {showDangerMessage} from "../../messages";
+import firebaseProj from 'js/fareConfig';
 
 let areas = [
     require("assets/area-1.json"),
@@ -94,7 +95,7 @@ class MapController{
         if(!car.withOrder){
             let dest = autoPoints[Math.round(Math.random() * autoPoints.length)];
 
-            while(dest == car.path.coords)
+            while(dest === car.path.coords)
                 dest = autoPoints[Math.round(Math.random() * autoPoints.length)];
 
             car.path.dest = dest;
@@ -144,7 +145,7 @@ class MapController{
         }
     }
 
-    findNewPoint(curCoords, steps, speed = 0.01){
+    static findNewPoint(curCoords, steps, speed = 0.005){
         let newCoords = {lat: curCoords.lat, lng: curCoords.lng};
 
         while(speed > 0){
@@ -204,7 +205,7 @@ class MapController{
 
                let newCoords = car.coords;
                if(car.path && car.path.steps)
-                newCoords = this.findNewPoint(car.coords, car.path.steps);
+                newCoords = MapController.findNewPoint(car.coords, car.path.steps);
 
            if(car.withOrder && curOrder.status === stat.ORDER_MOVE)
                car.distance += this.googleMaps.geometry.spherical.computeDistanceBetween(
@@ -240,8 +241,6 @@ class MapController{
                     if(car.path.steps[0].distance.value)
                         car.path.loaded = true;
                 }
-                //else
-                    //alert('Directions request failed due to ' + status);
             });
 
             car.messageWindow.setContent(this.createContentForAuto(car));
@@ -267,7 +266,7 @@ class MapController{
 
         this.makeAreaControl();
 
-        setInterval(this.animateMove.bind(this), 5000);
+        setInterval(this.animateMove.bind(this), 3000);
     }
 
     async createOrder(orderInfo){
@@ -295,7 +294,7 @@ class MapController{
         if([stat.ORDER_PAY, stat.ORDER_AUTO].includes(orderInfo.status))
             orderInfo.marker.setMap(null);
 
-        orderInfo.messageWindow = this.createWindow(this.createContentForOrder(orderInfo));
+        orderInfo.messageWindow = this.createWindow(MapController.createContentForOrder(orderInfo));
 
         orderInfo.marker.addListener('click', this.orderMarkerListener.bind(this, orderInfo));
 
@@ -382,8 +381,6 @@ class MapController{
                    tax
                 });
             }
-            //else
-            //  alert('Directions request failed due to ' + status);
         });
 
         auto.path = pathInfo;
@@ -404,7 +401,7 @@ class MapController{
         //button start travel handler
         window.onAutoButClick = this.autoButClick.bind(this);
 
-        if(this.selectedAuto == auto)
+        if(this.selectedAuto === auto)
             return '<div>Выберите заказ</div>';
 
         if(auto.orderID && auto.orderID !== '') {
@@ -432,7 +429,7 @@ class MapController{
         </div>`;
     }
 
-    createContentForOrder(info){
+    static createContentForOrder(info){
 
         let waitTime = Math.ceil((new Date() - info.orderCreate)/60000),
             content = ``;
@@ -484,7 +481,6 @@ class MapController{
             )
             .then( () => {
                 //update local info
-
                 auto.orderID = '';
                 auto.tax = null;
                 auto.distance = 0;
@@ -535,7 +531,7 @@ class MapController{
 
     orderMarkerListener(orderInfo){
         if (!this.selectedAuto) {
-            orderInfo.messageWindow.setContent(this.createContentForOrder(orderInfo));
+            orderInfo.messageWindow.setContent(MapController.createContentForOrder(orderInfo));
             orderInfo.messageWindow.open(this.map, orderInfo.marker);
         }
         else{
@@ -548,10 +544,13 @@ class MapController{
 
                 //change order properties
                 orderInfo.status = stat.ORDER_WAIT;
-                orderInfo.messageWindow.setContent(this.createContentForOrder(orderInfo));
+                orderInfo.messageWindow.setContent(MapController.createContentForOrder(orderInfo));
 
                 //change auto properties
-                let index = this.auto.findIndex((e) => e == this.selectedAuto),
+                let index = this.auto.findIndex(
+                    (e) =>
+                                e === this.selectedAuto
+                    ),
                     newAuto = {
                         coords: this.auto[index].coords,
                         status: stat.AUTO_ORDER,
@@ -564,7 +563,6 @@ class MapController{
 
                 this.auto[index].marker.setMap(null);
                 this.auto.splice(index, 1);
-
                 this.createAuto(newAuto);
 
                 //save database
@@ -592,7 +590,7 @@ class MapController{
         if(this.selectedAuto === autoInfo)
             this.selectedAuto = null;
         else if(this.selectedAuto){
-            alert('Выберите заказ или отмените выбор заказа');
+            showDangerMessage('Выберите заказ или отмените выбор заказа');
             return;
         }
 
@@ -605,9 +603,7 @@ class MapController{
             type = target.dataset.type,
             auto = this.auto.find((elem) => {
                 return elem.nomer == event.target.dataset.nomer;
-            });
-
-            let
+            }),
             order = this.orders.find( (elem) => {
                 return elem.orderID == auto.orderID;
             });
@@ -655,7 +651,7 @@ class MapController{
             return this.googleMaps.geometry.poly.containsLocation(address, area);
         } );
 
-        let tax = curArea ?
+        return curArea ?
             (
                 this.auto.reduce(
                     (a, b) =>
@@ -669,8 +665,6 @@ class MapController{
             )
             :
             COST_OFFCITY_PER_KM;
-
-        return tax;
     }
 
     static makeBut(type, nomer, text){
@@ -696,7 +690,7 @@ class MapController{
         inputWrap.className = 'custom-control custom-checkbox';
 
         check.className = 'custom-control-input';
-        check.style.zIndex = 999;
+        check.style.zIndex = '999';
         check.type = 'checkbox';
         check.name = 'showAreas';
         check.onchange = () => {
@@ -712,9 +706,7 @@ class MapController{
         this.map.controls[this.googleMaps.ControlPosition.TOP_RIGHT].push(wrapper);
 
         return wrapper;
-
     }
-
 }
 
 export default MapController;

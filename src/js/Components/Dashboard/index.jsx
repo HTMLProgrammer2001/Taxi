@@ -2,7 +2,8 @@
 import MapController from './MapClass';
 import OrderForm from './OrderForm';
 import Layout from 'js/Layout';
-import ProfileForm from "../Profile/ProfileForm";
+import {showDangerMessage} from "../../messages";
+import firebaseProj from 'js/fareConfig';
 
 require('bootstrap');
 
@@ -28,10 +29,10 @@ class Dashboard extends React.Component{
 
         //load data
         let dbRef = firebaseProj.database().ref('/');
-
         dbRef.once('value').then( (res) => {
             //push to map
-            this.mapControll.loadData(res.val());
+            this.mapControll.loadData(res.val())
+                .catch((e) => showDangerMessage(e.message));
         } );
 
     }
@@ -68,7 +69,8 @@ class Dashboard extends React.Component{
     }
 
     onOrderCreate(order){
-        this.mapControll.createOrder(order);
+        this.mapControll.createOrder(order)
+            .catch((e) => showDangerMessage(e.message));
     }
 }
 

@@ -1,8 +1,11 @@
 import {NavLink} from 'react-router-dom';
 
+import {showDangerMessage} from "../messages";
+import firebaseProj from 'js/fareConfig';
+
 function Header() {
     function logout() {
-        firebaseProj.auth().signOut();
+        firebaseProj.auth().signOut().catch((e) => showDangerMessage(e.message));
     }
 
     return (
