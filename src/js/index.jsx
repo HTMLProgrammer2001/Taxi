@@ -3,10 +3,12 @@ import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import 'scss/style.scss';
 import 'pages/index.jade';
 
+import React from 'react';
+
 //Modules
 import {BrowserRouter as Router, Route} from 'react-router-dom';
 import ReactDOM from 'react-dom';
-import firebase from 'firebase';
+import * as firebase from 'firebase/app';
 import {createStore, applyMiddleware} from 'redux';
 import {Provider} from 'react-redux';
 import thunk from 'redux-thunk';
@@ -25,7 +27,7 @@ import reducer from './Reducers/';
 
 window.firebaseProj = firebase.initializeApp(fireBaseConfig);
 
-window.store = createStore(reducer, composeWithDevTools(applyMiddleware(thunk)));
+let store = createStore(reducer, composeWithDevTools(applyMiddleware(thunk)));
 
 ReactDOM.render(
     <Provider store = {store}>

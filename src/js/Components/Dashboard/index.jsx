@@ -2,6 +2,9 @@
 import MapController from './MapClass';
 import OrderForm from './OrderForm';
 import Layout from 'js/Layout';
+import ProfileForm from "../Profile/ProfileForm";
+
+require('bootstrap');
 
 const loadGoogleMapsApi = require('load-google-maps-api');
 
@@ -42,9 +45,23 @@ class Dashboard extends React.Component{
                     ref = {(elem) => this.mapElem = elem}
                 >.</div>
 
-                <div className="mt-3 d-flex justify-content-center">
-                    <OrderForm
-                        onCreate = {this.onOrderCreate}/>
+                <div>
+                    <div className="p-3 addOrderPopupBut bg-primary" data-toggle = "modal" data-target = "#addOrder">
+                        +
+                    </div>
+
+                    <div className="modal" role = "dialog" id="addOrder">
+                        <div className="modal-dialog" role = "document">
+                            <div className="modal-content">
+                                <div className="modal-header d-flex justify-content-end">
+                                    <span data-dismiss = 'modal' className="cursor">&times;</span>
+                                </div>
+                                <div className="modal-body">
+                                    <OrderForm onCreate = {this.onOrderCreate}/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </React.Fragment>
         );

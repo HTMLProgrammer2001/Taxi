@@ -5,7 +5,7 @@ function UserInfo(){
         <table className="table table-bordered">
             <tbody>
             <tr>
-                <td>Name</td>
+                <td>Имя</td>
                 <td>{user.displayName}</td>
             </tr>
 
@@ -15,17 +15,17 @@ function UserInfo(){
             </tr>
 
             <tr>
-                <td>Email verified</td>
+                <td>Email подтвержден</td>
 
                 {
                     user.emailVerified
                         ?
                         <td className="text-success">
-                            Verified
+                            Подтвержден
                         </td>
                         :
                         <td className="text-danger">
-                            Unverified
+                            Не подтвержден
                         </td>
                 }
             </tr>

@@ -1,5 +1,9 @@
+import 'firebase/storage';
+import 'firebase/auth';
+
 import Layout from 'js/Layout';
 
+import UserAva from './UserAva';
 import UserInfo from './UserInfo';
 import ProfileForm from './ProfileForm';
 
@@ -15,12 +19,7 @@ class Profile extends React.Component{
     render(){
         return(
             <div className="container my-5 row justify-content-center">
-                <div className="overflow-hidden col-sm-3 col-offset-2">
-                    <img
-                        src={firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')}
-                        className="w-100"
-                        alt=""/>
-                </div>
+                <UserAva onAvaChange = {this.onProfileChange}/>
 
                 <div className="col-sm-6">
                     <UserInfo/>
@@ -31,7 +30,7 @@ class Profile extends React.Component{
                         <div className="modal-dialog" role = "document">
                             <div className="modal-content">
                                 <div className="modal-header d-flex justify-content-end">
-                                    <span data-dismiss = 'modal'>&times;</span>
+                                    <span data-dismiss = 'modal' className="cursor">&times;</span>
                                 </div>
                                 <div className="modal-body">
                                     <ProfileForm onProfileChange = {this.onProfileChange}/>
@@ -51,10 +50,6 @@ class Profile extends React.Component{
             })
         );
     }
-}
-
-function Profile(){
-
 }
 
 export default Layout(Profile);

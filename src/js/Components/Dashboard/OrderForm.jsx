@@ -1,3 +1,5 @@
+import {showDangerMessage, showSuccessMessage} from "../../messages";
+
 class OrderForm extends React.Component{
     constructor(props){
         super(props);
@@ -26,7 +28,7 @@ class OrderForm extends React.Component{
             );
 
         return (
-            <form onSubmit={this.addOrder} className="w-50 align-items-center d-flex flex-column">
+            <form onSubmit={this.addOrder} className="align-items-center d-flex flex-column">
                 {this.state.savingError ?
                     <div className="alert alert-danger">
                         {this.state.savingError}
@@ -40,10 +42,10 @@ class OrderForm extends React.Component{
                 <input
                     type="text"
                     name = "orderStart"
-                    onInput={this.onFormChange}
-                    value={this.state.fieldsValue.orderStart}
-                    className="form-control"
-                    placeholder="Enter start address"/>
+                    onChange = {this.onFormChange}
+                    value ={this.state.fieldsValue.orderStart || ''}
+                    className = "form-control"
+                    placeholder = "Введите начальный адресс"/>
 
                 <label className="text-danger text-small">
                     {this.state.fieldsError.orderStart}
@@ -52,10 +54,10 @@ class OrderForm extends React.Component{
                 <input
                     type="text"
                     name = "orderDestination"
-                    onInput={this.onFormChange}
-                    value={this.state.fieldsValue.orderDestination}
-                    className="form-control"
-                    placeholder="Enter destination address"/>
+                    onChange = {this.onFormChange}
+                    value = {this.state.fieldsValue.orderDestination || ''}
+                    className = "form-control"
+                    placeholder = "Введите конечный адресс"/>
 
                 <label className="text-danger text-small">
                     {this.state.fieldsError.orderDestination}
@@ -64,19 +66,19 @@ class OrderForm extends React.Component{
                 <input
                     type="text"
                     name = "orderPhone"
-                    onInput={this.onFormChange}
-                    value={this.state.fieldsValue.orderPhone}
-                    className="form-control"
-                    placeholder="Enter your phone"/>
+                    onChange = {this.onFormChange}
+                    value = {this.state.fieldsValue.orderPhone || ''}
+                    className = "form-control"
+                    placeholder = "Введите номер телефона"/>
 
-                <label className="text-danger text-small">
+                <label className = "text-danger text-small">
                     {this.state.fieldsError.orderPhone}
                 </label>
 
                 <button
                     type = "submit"
                     name = "create"
-                    className="btn btn-primary mt-3 w-50">
+                    className = "btn btn-primary mt-3 w-50">
                     Создать
                 </button>
             </form>
@@ -104,14 +106,17 @@ class OrderForm extends React.Component{
             fieldsError: errors
         });
 
-        if(Object.keys(errors).length)
+        if(Object.keys(errors).length){
+            showDangerMessage('Ошибка заполнения формы заказа');
+
             return;
+        }
 
         //create order
         let orderObj = {
             destination: this.state.fieldsValue.orderDestination,
             start: this.state.fieldsValue.orderStart,
-            status: 'Free',
+            status: 'Свободен',
             orderCreate: +new Date(),
             phone: this.state.fieldsValue.orderPhone,
             user: firebaseProj.auth().currentUser.uid
@@ -126,6 +131,8 @@ class OrderForm extends React.Component{
             .then( () => {
                 this.props.onCreate({orderID: newOrder.key, ...orderObj});
 
+                showSuccessMessage('Заказ добавлен');
+
                 this.setState({
                     fieldsError: {},
                     fieldsValue: {
@@ -136,6 +143,8 @@ class OrderForm extends React.Component{
                     savingError: null
                 });
             }, (err) => {
+                showDangerMessage('Ошибка сохранения формы');
+
                 this.setState({
                    savingError: err.message
                 });
@@ -147,13 +156,13 @@ class OrderForm extends React.Component{
         let errors = {};
 
         if(!(new RegExp('\\+\\d{10}').test(this.state.fieldsValue.orderPhone)))
-            errors.orderPhone = 'Input correct phone(like +380501122333)';
+            errors.orderPhone = 'Введите корректный телефон(like +380501122333)';
 
         if(!this.state.fieldsValue.orderStart)
-            errors.userName = 'Enter start address!';
+            errors.userName = 'Введите начальный адресс';
 
         if(!this.state.fieldsValue.orderDestination)
-            errors.userName = 'Enter destination address!';
+            errors.userName = 'Введите конечный адресс';
 
         return errors;
     }

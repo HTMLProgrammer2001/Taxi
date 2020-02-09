@@ -1,5 +1,8 @@
 import Header from "./Components/Header";
 
+
+import 'firebase/auth';
+import 'firebase/database';
 import {Redirect} from 'react-router-dom';
 
 function Layout(Page){

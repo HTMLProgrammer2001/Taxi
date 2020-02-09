@@ -1,3 +1,5 @@
+import 'firebase/auth';
+
 import Auth from './AuthForm.jsx';
 import Registration from './RegForm.jsx';
 

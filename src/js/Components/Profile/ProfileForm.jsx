@@ -1,4 +1,5 @@
 import UpdateError from "../Forms/Error";
+import {showDangerMessage, showSuccessMessage} from "../../messages";
 
 require("bootstrap");
 require("babel-polyfill");
@@ -29,7 +30,7 @@ class ProfileForm extends React.Component{
                     onInput={this.onFormChange}
                     value={this.state.fieldsValue.userName}
                     className="form-control"
-                    placeholder="Enter new name"/>
+                    placeholder="Введите новое имя"/>
 
                 <label className="text-danger text-small d-block mb-3">
                     {this.state.fieldsError.userName}
@@ -42,7 +43,7 @@ class ProfileForm extends React.Component{
                         name = "userPhoto"
                         onChange={this.onFormChange}
                         className="custom-file-input"
-                        placeholder="Select photo"/>
+                        placeholder="Выберите фото"/>
 
                     {
                         this.state.fieldsError.userPhoto ?
@@ -63,7 +64,7 @@ class ProfileForm extends React.Component{
                     onInput={this.onFormChange}
                     value={this.state.fieldsValue.userPassword}
                     className="form-control"
-                    placeholder="Enter new password"/>
+                    placeholder="Введите новый пароль"/>
 
                 <label className="text-danger text-small d-block mb-3">
                     {this.state.fieldsError.userPassword}
@@ -76,7 +77,7 @@ class ProfileForm extends React.Component{
                     onInput={this.onFormChange}
                     value={this.state.fieldsValue.confirmPassword}
                     className="form-control"
-                    placeholder="Confirm new password"/>
+                    placeholder="Подтвердите пароль"/>
 
                 <label className="text-danger text-small d-block mb-3">
                     {this.state.fieldsError.confirmPassword}
@@ -118,6 +119,8 @@ class ProfileForm extends React.Component{
                 fieldsError: errors
             });
 
+            showDangerMessage('Ошибки заполнения формы');
+
             return;
         }
 
@@ -152,6 +155,8 @@ class ProfileForm extends React.Component{
                 () => {
                     this.props.onProfileChange();
 
+                    showSuccessMessage('Профиль обновлен');
+
                     this.setState({
                         fieldsError: {},
                         updateError: ''
@@ -160,6 +165,8 @@ class ProfileForm extends React.Component{
             )
             .catch( (error) => {
                 //redraw component to display errors
+                showDangerMessage('Ошибка обновления');
+
                 this.setState({
                     updateError: error.message
                 });
@@ -170,20 +177,23 @@ class ProfileForm extends React.Component{
         let errors = {};
 
         if(this.state.fieldsValue.userName && this.state.fieldsValue.userName < 3)
-            errors.userName = 'Enter your new name(minimum 3 letters)';
+            errors.userName = 'Минимальная длина имени 3 символа';
 
         if(this.state.fieldsValue.userPassword && this.state.fieldsValue.userPassword.length < 8)
-            errors.userPassword = 'Minimum password length is 8';
+            errors.userPassword = 'Минимальная длина пароля 8 символов';
 
         if(this.state.fieldsValue.confirmPassword !== this.state.fieldsValue.userPassword)
-            errors.confirmPassword = 'Passwords are not equals';
+            errors.confirmPassword = 'Пароли не совпадают';
 
         //check & convert photo
         if(!this.state.fieldsValue.userPhoto)
             return errors;
 
+        if(!this.state.fieldsValue.userPhoto.type.includes('image'))
+            errors.userPhoto = 'Файл должен быть фотографией';
+
         if(this.state.fieldsValue.userPhoto.size > 5*1024*1024)
-            errors.userPhoto = 'Exceed maximum size(5 Mb)';
+            errors.userPhoto = 'Превышен максимальный размер фото(5Мб)';
 
         return errors;
     }

@@ -1,5 +1,6 @@
 import * as stat from './const';
 import {COST_PER_KM, COST_BUSY_PER_KM, COST_OFFCITY_PER_KM} from './const';
+import {showDangerMessage} from "../../messages";
 
 let areas = [
     require("assets/area-1.json"),
@@ -345,8 +346,7 @@ class MapController{
 
     createPath(auto, dest){
         //create  path
-        let
-            pathInfo = {dest: dest};
+        let pathInfo = {dest: dest};
 
         pathInfo.directionServ = new this.googleMaps.DirectionsService;
         pathInfo.directionRenderer = new this.googleMaps.DirectionsRenderer({
@@ -524,10 +524,8 @@ class MapController{
     }
 
     async loadData(data){
-        for(let key in data.orders){
-
+        for(let key in data.orders)
             await this.createOrder({orderID: key, ...data.orders[key]});
-        }
 
         data.auto.forEach( (auto, autoID) => {
             if(auto)
@@ -639,18 +637,17 @@ class MapController{
            catch (e) {
                reject(e);
            }
-        });
+        })
+            .catch( (e) => showDangerMessage(e.message) );
     }
 
     //update data
     updateAutoData(autoID, data){
-
-        return this.dbInfo.child('auto/' + autoID).update(data);
+        return this.dbInfo.child('auto/' + autoID).update(data).catch( (e) => showDangerMessage(e.message) );
     }
 
     updateOrderData(orderID, data){
-
-        return this.dbInfo.child('orders/' + orderID).update(data);
+        return this.dbInfo.child('orders/' + orderID).update(data).catch( (e) => showDangerMessage(e.message) );
     }
 
     selectTax(address){

@@ -27,13 +27,14 @@ class HistoryForm extends React.Component{
                         <select
                             name = "driver"
                             className="custom-select mb-3"
+                            value = {this.props.historyForm.driver || ''}
                             onChange = {
                                 (e) => this.props.historyFilterChange(
                                     creators.historyDriverChange(e.target.value)
                                 )
                             }
                         >
-                            <option value = "">All</option>
+                            <option value = "">Все</option>
 
                             {
                                 Object.entries(this.state.auto).map(([key, auto]) => {
@@ -50,6 +51,7 @@ class HistoryForm extends React.Component{
                             type="date"
                             className="form-control mb-3"
                             placeholder="Date start"
+                            value = {this.props.historyForm.dateStart || ''}
                             onChange={
                                 (e) => this.props.historyFilterChange(
                                     creators.historyDateStartChange(e.target.value)
@@ -59,12 +61,13 @@ class HistoryForm extends React.Component{
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="dateEnd">Заканчивая:</label>
+                        <label htmlFor="dateEnd">Заканчивая до:</label>
 
                         <input
                             type="date"
                             className="form-control mb-3"
                             placeholder="Date end"
+                            value = {this.props.historyForm.dateEnd || ''}
                             onChange={
                                 (e) => this.props.historyFilterChange(
                                     creators.historyDateEndChange(e.target.value)
@@ -78,13 +81,14 @@ class HistoryForm extends React.Component{
 
                         <select
                             className="custom-select mb-3"
+                            value = {this.props.historyForm.status || ''}
                             onChange={
                                 (e) => this.props.historyFilterChange(
                                     creators.historyStatusChange(e.target.value)
                                 )
                             }
                         >
-                            <option value = "">All</option>
+                            <option value = "">Все</option>
                             {
                                 [stat.ORDER_FREE, stat.ORDER_WAIT, stat.ORDER_AUTO,
                                     stat.ORDER_MOVE, stat.ORDER_PAY, stat.ORDER_FINISHED].map(
@@ -101,14 +105,15 @@ class HistoryForm extends React.Component{
 
                         <select
                             className="custom-select mb-3"
+                            value = {this.props.historyForm.sortBy || ''}
                             onChange={
                                 (e) => this.props.historyFilterChange(
                                     creators.historySortFieldChange(e.target.value)
                                 )
                             }
                         >
-                            <option value="orderCreate">Date of create</option>
-                            <option value="status">Status</option>
+                            <option value="orderCreate">Дате создания</option>
+                            <option value="status">Статусу</option>
                             <option value="orderID">ID</option>
                         </select>
                     </div>
@@ -122,7 +127,7 @@ class HistoryForm extends React.Component{
                                 className="custom-control-input"
                                 name = "sortDir"
                                 value="ASC"
-                                defaultChecked={true}
+                                defaultChecked={this.props.historyForm.sortDir === 'ASC'}
                                 onClick={
                                     (e) => this.props.historyFilterChange(
                                         creators.historySortDirectionChange(e.target.form.sortDir.value)
@@ -147,6 +152,7 @@ class HistoryForm extends React.Component{
                                         creators.historySortDirectionChange(e.target.form.sortDir.value)
                                     )
                                 }
+                                defaultChecked={this.props.historyForm.sortDir === 'DESC'}
                                 style = {{zIndex: 9999}}
                             />
                             <label

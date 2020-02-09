@@ -1,4 +1,5 @@
 import AuthError from './Error';
+import {showDangerMessage} from "../../messages";
 
 class AuthForm extends React.Component{
     constructor(props){
@@ -22,10 +23,10 @@ class AuthForm extends React.Component{
                 <input
                     type="email"
                     name = "userEmail"
-                    onInput={this.onFieldChange}
-                    value = {this.state.fieldsValue.userEmail}
+                    onChange = {this.onFieldChange}
+                    value = {this.state.fieldsValue.userEmail || ''}
                     className="form-control"
-                    placeholder="Enter email"/>
+                    placeholder="Введите email"/>
 
                 <label className="text-danger" htmlFor="userEmail">
                     {this.state.fieldsError.userEmail}
@@ -34,10 +35,10 @@ class AuthForm extends React.Component{
                 <input
                     type="password"
                     name = "userPassword"
-                    onInput={this.onFieldChange}
-                    value = {this.state.fieldsValue.userPassword}
+                    onChange = {this.onFieldChange}
+                    value = {this.state.fieldsValue.userPassword || ''}
                     className="form-control"
-                    placeholder="Enter password"/>
+                    placeholder="Введите пароль"/>
 
                 <label className="text-danger mb-3 d-block" htmlFor="userPassword">
                     {this.state.fieldsError.userPassword}
@@ -70,8 +71,10 @@ class AuthForm extends React.Component{
             fieldsError: errors
         });
 
-        if(Object.keys(errors).length)
+        if(Object.keys(errors).length){
+            showDangerMessage('Ошибки в заполнении формы авторизации');
             return;
+        }
 
         //register new user
         firebaseProj.auth().signInWithEmailAndPassword(
@@ -84,6 +87,8 @@ class AuthForm extends React.Component{
            })
         }, (error) => {
             //send authorize error message
+            showDangerMessage('Ошибка авторизации');
+
             this.setState({
                 authorizedError: error.message
             })
@@ -95,10 +100,10 @@ class AuthForm extends React.Component{
         let errors = {};
 
         if(!(new RegExp('.+@.{3,8}\..{3,8}').test(this.state.fieldsValue.userEmail)))
-            errors.userEmail = 'Input correct email';
+            errors.userEmail = 'Введите корректный email';
 
         if(!this.state.fieldsValue.userPassword || this.state.fieldsValue.userPassword.length < 8)
-            errors.userPassword = 'Minimum password length is 8';
+            errors.userPassword = 'Минимальная длина пароля 8 символов';
 
         return errors;
     }

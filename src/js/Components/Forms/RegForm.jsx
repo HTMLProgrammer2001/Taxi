@@ -1,4 +1,5 @@
 import RegError from './Error';
+import {showDangerMessage} from "../../messages";
 
 class RegistryForm extends React.Component{
     constructor(props){
@@ -23,54 +24,50 @@ class RegistryForm extends React.Component{
                 <input
                     type="email"
                     name = "userEmail"
-                    onInput={this.onFormChange}
-                    value = {this.state.fieldsValue.userEmail}
+                    onChange = {this.onFormChange}
+                    value = {this.state.fieldsValue.userEmail || ''}
                     className="form-control"
-                    placeholder="Enter email"/>
+                    placeholder="Введите email"/>
 
                 <label className="text-danger text-small">
                     {this.state.fieldsError.userEmail}
                 </label>
 
-
                 <input
                     type="text"
                     name = "userName"
-                    onInput={this.onFormChange}
-                    value = {this.state.fieldsValue.userName}
+                    onChange = {this.onFormChange}
+                    value = {this.state.fieldsValue.userName || ''}
                     className="form-control"
-                    placeholder="Enter name"/>
+                    placeholder="Введите имя"/>
 
                 <label className="text-danger text-small">
                     {this.state.fieldsError.userName}
                 </label>
 
-
                 <input
                     type="password"
                     name = "userPassword"
-                    onInput={this.onFormChange}
-                    value = {this.state.fieldsValue.userPassword}
+                    onChange = {this.onFormChange}
+                    value = {this.state.fieldsValue.userPassword || ''}
                     className="form-control"
-                    placeholder="Enter password"/>
+                    placeholder="Введите пароль"/>
 
                 <label className="text-danger text-small">
                     {this.state.fieldsError.userPassword}
                 </label>
 
-
                 <input
                     type="password"
                     name = "confirmPassword"
-                    onInput={this.onFormChange}
-                    value = {this.state.fieldsValue.confirmPassword}
+                    onChange = {this.onFormChange}
+                    value = {this.state.fieldsValue.confirmPassword || ''}
                     className="form-control"
-                    placeholder="Confirm password"/>
+                    placeholder="Подтвердите пароль"/>
 
                 <label className="text-danger text-small d-block mb-3">
                     {this.state.fieldsError.confirmPassword}
                 </label>
-
 
                 <button
                     type = "submit"
@@ -105,8 +102,10 @@ class RegistryForm extends React.Component{
             fieldsError: errors
         });
 
-        if(Object.keys(errors).length)
+        if(Object.keys(errors).length){
+            showDangerMessage('Ошибки в заполнении формы регистрации');
             return;
+        }
 
         //create user
         this.createUser();
@@ -116,16 +115,16 @@ class RegistryForm extends React.Component{
         let errors = {};
 
         if(!(new RegExp('.+@.{3,8}\..{3,8}').test(this.state.fieldsValue.userEmail)))
-            errors.userEmail = 'Input correct email';
+            errors.userEmail = 'Введите корректный email';
 
-        if(!this.state.fieldsValue.userName)
-            errors.userName = 'Enter your name';
+        if(!this.state.fieldsValue.userName || this.state.fieldsValue.userName.length < 3)
+            errors.userName = 'Минимальная длина имени 3 символа';
 
         if(!this.state.fieldsValue.userPassword || this.state.fieldsValue.userPassword.length < 8)
-            errors.userPassword = 'Minimum password length is 8';
+            errors.userPassword = 'Минимальная длина пароля 8 символов';
 
         if(this.state.fieldsValue.confirmPassword !== this.state.fieldsValue.userPassword)
-            errors.confirmPassword = 'Passwords are not equals';
+            errors.confirmPassword = 'Пароли не совпадают';
 
         return errors;
     }
@@ -142,6 +141,8 @@ class RegistryForm extends React.Component{
                 })
             )
             .then( () => {
+                showDangerMessage('Ошибка сохранения');
+
                 this.setState({
                     registrationError: ''
                 });

@@ -93,8 +93,8 @@ let stateToProps = (state) => {
 
     //check date
     orders = orders.filter( (ord) => {
-        return ord.orderCreate > state.history.form.dateStart
-            && (!state.history.form.dateEnd || ord.orderCreate < state.history.form.dateEnd);
+        return (!state.history.form.dateStart || ord.orderCreate > Date.parse(state.history.form.dateStart))
+            && (!state.history.form.dateEnd || ord.orderCreate < Date.parse(state.history.form.dateEnd));
     } );
 
     //check status

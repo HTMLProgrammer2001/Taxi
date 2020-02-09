@@ -62,6 +62,7 @@ let conf = {
 					loader: 'file-loader',
 					options: {
 						outputPath: 'assets/images',
+						publicPath: '/assets/images',
 						name: '[name].[ext]'
 					}
 				}
