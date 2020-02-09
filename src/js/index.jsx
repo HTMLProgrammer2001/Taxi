@@ -29,7 +29,7 @@ ReactDOM.render(
     <Provider store = {store}>
         <Router>
             <React.Suspense fallback = {<Animation/>}>
-                <Route exact path = "/" component = {Animation}/>
+                <Route exact path = "/" component = {Forms}/>
                 <Route path = "/profile" component = {Profile}/>
                 <Route path = "/dashboard" component = {Dashboard}/>
                 <Route path = "/history" component = {History}/>

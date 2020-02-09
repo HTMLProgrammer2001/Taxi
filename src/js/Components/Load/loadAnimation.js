@@ -30,7 +30,7 @@ class Animate{
         let w = this.elem.width = this.elem.offsetWidth,
             h = this.elem.height = this.elem.offsetHeight;
 
-        this.ctx.fillStyle = "#222";
+        this.ctx.fillStyle = "#fff";
         this.ctx.fillRect(0, 0, w, h);
 
         this.particles.forEach((P) => {
@@ -42,7 +42,7 @@ class Animate{
                 Math.sin(P.th) * this.opts.radius + h/2,
                 this.opts.minRadius + P.added, 0, Math.PI * 2);
 
-            this.ctx.fillStyle = "hsl(" + P.th*30 + ", 50%, 50%)";
+            this.ctx.fillStyle = "#777";
             this.ctx.fill();
         });
 

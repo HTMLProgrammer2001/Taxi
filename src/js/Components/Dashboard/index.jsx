@@ -48,7 +48,7 @@ class Dashboard extends React.Component{
 
                 <div>
                     <div className="p-3 addOrderPopupBut bg-primary" data-toggle = "modal" data-target = "#addOrder">
-                        +
+                        <span>+</span>
                     </div>
 
                     <div className="modal" role = "dialog" id="addOrder">
