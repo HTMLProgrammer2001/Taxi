@@ -1,5 +1,7 @@
 let timer = null,
-    message = document.querySelector('#message-window');
+    message = document.querySelector('#message-window'),
+    success = require('assets/success.png'),
+    danger = require('assets/danger.png');
 
 function onMessage(){
     message.classList.remove('show');
@@ -19,19 +21,25 @@ function onMessage(){
 export const showSuccessMessage = (content) => {
     onMessage();
 
-    message.querySelector('.img').src = require('assets/success.png');
+    message.querySelector('.img').src = success;
     message.querySelector('.text').textContent = content;
 
     message.classList.add('alert-success');
-    message.classList.add('show');
+
+    message.querySelector('.img').onload = () => {
+        message.classList.add('show');
+    };
 };
 
 export const showDangerMessage = (content) => {
     onMessage();
 
-    message.querySelector('.img').src = require('assets/danger.png');
+    message.querySelector('.img').src = danger;
     message.querySelector('.text').textContent = content;
 
     message.classList.add('alert-danger');
-    message.classList.add('show');
+
+    message.querySelector('.img').onload = () => {
+        message.classList.add('show');
+    };
 };
