@@ -18,7 +18,33 @@ function Header() {
                 <NavLink activeClassName="active" className="mr-3" to = "/profile">Профиль</NavLink>
                 <NavLink activeClassName="active" className="mr-3" to = "/history">История</NavLink>
                 <NavLink activeClassName="active" to = "/dashboard" className="mr-3">Доска объявлений</NavLink>
-                <NavLink to = "/" onClick={logout} className = "mr-3">Выйти</NavLink>
+
+                <div className="dropdown">
+                    <div
+                        className = "menu-account dropdown-toggle"
+                        data-toggle = "dropdown">
+
+                            <img src = {firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')} className="menu-account-photo"/>
+
+                            <div className="menu-account-info">
+                                <span className="menu-account-info-name">{firebaseProj.auth().currentUser.displayName}</span>
+                            </div>
+                    </div>
+
+                    <ul className="dropdown-menu menu-account-content">
+                        <li className="dropdown-menu-item menu-account-item">
+                            <NavLink to = '/profile'>Профиль</NavLink>
+                        </li>
+
+                        <li className="dropdown-menu-item menu-account-item">
+                            <NavLink to = '/profile#updateForm'>Обновить аккаунт</NavLink>
+                        </li>
+
+                        <li className="dropdown-menu-item menu-account-item">
+                            <NavLink to = '/' onClick={logout}>Выйти</NavLink>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     );

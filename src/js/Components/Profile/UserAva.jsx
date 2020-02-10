@@ -8,7 +8,8 @@ class UserAva extends React.Component{
         super(props);
 
         this.onPhotoChange = this.onPhotoChange.bind(this);
-        this.onButClick = this.onButClick.bind(this);
+        this.onUpdateButClick = this.onUpdateButClick.bind(this);
+        this.onDeleteButClick = this.onDeleteButClick.bind(this);
 
         this.state = {
             file: null,
@@ -33,14 +34,19 @@ class UserAva extends React.Component{
                 />
 
                 <label
-                    onClick={this.onButClick}
+                    onClick={this.onUpdateButClick}
                     className="btn-primary btn btn-block"
                     htmlFor="userAva">{this.state.message ? this.state.message : 'Обновить фото'}</label>
+
+                <div
+                    className="btn btn-danger btn-block mt-1"
+                    onClick={this.onDeleteButClick}
+                >Удалить фото</div>
             </div>
         );
     }
 
-    async onButClick(e){
+    async onUpdateButClick(e){
         if(!this.state.updated)
             return;
         else
@@ -101,6 +107,18 @@ class UserAva extends React.Component{
             file,
             updated: true
         });
+    }
+
+    onDeleteButClick(){
+        firebaseProj.auth().currentUser.updateProfile({
+            photoURL: ''
+        }).then(
+            () => {
+                this.props.onAvaChange();
+
+                showSuccessMessage('Аватар удален');
+            }
+        );
     }
 }
 

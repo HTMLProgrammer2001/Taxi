@@ -12,11 +12,6 @@ function Error(props){
             return (
                 <Redirect to = {props.successRedirect} push = {true}/>
             );
-    else
-        if(props.error === '' && props.successMessage)
-            return (
-                <div>{props.successMessage}</div>
-            );
 
     return null;
 }

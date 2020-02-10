@@ -23,7 +23,7 @@ class ProfileForm extends React.Component{
     render(){
         return (
             <form onSubmit={this.updateUser}>
-                <UpdateError error = {this.state.updateError} successMessage = 'Профиль обновлен'/>
+                <UpdateError error = {this.state.updateError}/>
 
                 <input
                     type="text"
@@ -127,7 +127,7 @@ class ProfileForm extends React.Component{
 
         //updateUser
         let user = firebaseProj.auth().currentUser,
-            photoURL = '',
+            photoURL = user.photoURL,
             name = this.state.fieldsValue.userName ? this.state.fieldsValue.userName : user.displayName;
 
         if(this.state.fieldsValue.userPhoto){
@@ -159,6 +159,7 @@ class ProfileForm extends React.Component{
                     showSuccessMessage('Профиль обновлен');
 
                     this.setState({
+                        fieldsValue: {},
                         fieldsError: {},
                         updateError: ''
                     });

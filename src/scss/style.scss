@@ -1,9 +1,14 @@
+%flex{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .forms{
+    @extend %flex;
+
 	width: 100%;
 	height: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
 	position: absolute;
 }
 
@@ -16,6 +21,8 @@
 }
 
 .addOrderPopupBut{
+    @extend %flex;
+
 	position: fixed;
 	bottom: 2rem;
 	right: 2rem;
@@ -35,10 +42,6 @@
 	cursor: pointer;
 
 	transition: .3s;
-
-	display: flex;
-	justify-content: center;
-	align-items: center;
 
 	&:hover{
 		box-shadow: none;
@@ -115,4 +118,52 @@
 	to{
 		right: calc(-1 * (100% + 2rem));
 	}
+}
+
+.menu{
+    display: flex;
+    align-items: center;
+
+    &-account{
+        @extend %flex;
+
+        position: relative;
+
+        height: 100%;
+        padding: 0 1rem;
+
+        cursor: pointer;
+
+        &-photo{
+            max-height: 50px;
+            max-width: 50px;
+
+            margin-right: .5rem;
+        }
+
+        &-info{
+            color: #777;
+
+            &-name{
+                color: deepskyblue;
+
+                user-select: none;
+            }
+        }
+
+        &-item{
+            display: block;
+            padding: .5rem 0;
+
+            text-align: center;
+            cursor: pointer;
+
+            border-bottom: 1px solid #ccc;
+        }
+
+        &-content{
+            padding: 0;
+            min-width: 9rem;
+        }
+    }
 }

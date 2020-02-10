@@ -8,6 +8,11 @@ import UserInfo from './UserInfo';
 import ProfileForm from './ProfileForm';
 
 class Profile extends React.Component{
+    componentDidMount(){
+        if(location.hash)
+            $(location.hash).modal('show');
+    }
+
     constructor(props){
         super(props);
 
@@ -24,7 +29,7 @@ class Profile extends React.Component{
                 <div className="col-sm-6">
                     <UserInfo/>
 
-                    <div className="btn btn-link" data-toggle = "modal" data-target = "#updateForm">Обновить профиль</div>
+                    <a className="btn btn-link" data-toggle = "modal" href = "#updateForm">Обновить профиль</a>
 
                     <div className="modal" role = "dialog" id="updateForm">
                         <div className="modal-dialog" role = "document">

@@ -15,7 +15,7 @@ function onMessage(){
 
     timer = setTimeout(() => {
         message.classList.add('hide');
-    }, 5000);
+    }, 3500);
 }
 
 export const showSuccessMessage = (content) => {
