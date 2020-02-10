@@ -26,7 +26,7 @@ class Profile extends React.Component{
             <div className="container my-5 row justify-content-center">
                 <UserAva onAvaChange = {this.onProfileChange}/>
 
-                <div className="col-sm-6">
+                <div className="col-sm-9 col-md-6">
                     <UserInfo/>
 
                     <a className="btn btn-link" data-toggle = "modal" href = "#updateForm">Обновить профиль</a>

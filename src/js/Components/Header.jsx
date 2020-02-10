@@ -23,8 +23,9 @@ function Header() {
                     <div
                         className = "menu-account dropdown-toggle"
                         data-toggle = "dropdown">
-
-                            <img src = {firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')} className="menu-account-photo"/>
+                            <div className="menu-account-photo-wrapper">
+                                <img src = {firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')} className="menu-account-photo"/>
+                            </div>
 
                             <div className="menu-account-info">
                                 <span className="menu-account-info-name">{firebaseProj.auth().currentUser.displayName}</span>
