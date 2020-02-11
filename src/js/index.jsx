@@ -18,8 +18,7 @@ const Forms = React.lazy( () => import('./Components/Forms/') );
 const Profile = React.lazy( () => import('./Components/Profile/') );
 const Dashboard = React.lazy( () => import('./Components/Dashboard/') );
 const History = React.lazy( () => import('./Components/History/') );
-
-import Test from './Components/Profile/t.jsx';
+const ProfileUpdate = React.lazy( () => import('./Components/ProfileUpdate/') );
 
 import Animation from './Components/Load/';
 
@@ -35,7 +34,7 @@ ReactDOM.render(
                 <Route path = "/profile" component = {Profile}/>
                 <Route path = "/dashboard" component = {Dashboard}/>
                 <Route path = "/history" component = {History}/>
-                <Route path = "/test" component = {Test}/>
+                <Route path = "/update" component = {ProfileUpdate}/>
             </React.Suspense>
         </Router>
     </Provider>,

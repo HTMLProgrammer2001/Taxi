@@ -1,6 +1,5 @@
 import CropAnimation from './CropAnimation';
-import {showDangerMessage, showSuccessMessage} from "../../../messages";
-import firebaseProj from 'js/fareConfig';
+import {showDangerMessage, showSuccessMessage} from "js/messages";
 
 class CropForm extends React.Component{
     constructor(props){
@@ -34,7 +33,7 @@ class CropForm extends React.Component{
 
     render(){
         return (
-          <div className="container d-flex flex-column align-items-center">
+          <div className="d-flex flex-column align-items-center">
               <div className="custom-file">
                   <label className="custom-file-label" htmlFor="photo">Выбрать фото</label>
                   <input type="file" onChange={this.onPhotoChange} className="custom-file-input" id="photo"/>
@@ -45,11 +44,7 @@ class CropForm extends React.Component{
                     <div>Загрузка фото...</div>
                         :
                     !this.state.file ?
-                        <img
-                            style = {{maxWidth: '100%'}}
-                            className="mt-1"
-                            src = {firebaseProj.auth().currentUser.photoURL}
-                        />
+                        this.props.defaultContent
                           :
                         null
               }
@@ -113,26 +108,8 @@ class CropForm extends React.Component{
     }
 
     async save(){
-        let blob = await this.animation.getData(),
-            ref = firebaseProj.storage().ref('/' + firebaseProj.auth().currentUser.uid + '.jpg');
-
-        await ref.put(blob);
-        let photo = await ref.getDownloadURL();
-
-        firebaseProj.auth().currentUser.updateProfile({
-            photoURL: photo
-        }).then(
-            () => {
-                this.props.onAvaChange();
-
-                this.setState({
-                    file: false,
-                    loaded: false
-                });
-
-                showSuccessMessage('Аватар изменен');
-            }
-        );
+        let blob = await this.animation.getData();
+        this.props.onChange(blob);
     }
 }
 

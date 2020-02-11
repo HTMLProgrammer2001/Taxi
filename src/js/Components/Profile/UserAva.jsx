@@ -1,4 +1,4 @@
-import CropForm from "./Crop/CropForm";
+import CropForm from "../Crop/CropForm";
 
 require('babel-polyfill');
 
@@ -9,6 +9,7 @@ class UserAva extends React.Component{
     constructor(props){
         super(props);
 
+        this.onChange = this.onChange.bind(this);
         this.onDeleteButClick = this.onDeleteButClick.bind(this);
     }
 
@@ -24,7 +25,7 @@ class UserAva extends React.Component{
                     className="btn-primary btn btn-block"
                     data-toggle = "modal"
                     data-target = "#changeAva">
-                    {this.state.message ? this.state.message : 'Обновить фото'}
+                    {'Обновить фото'}
                 </div>
 
                 <div className="modal" role="dialog" id="changeAva">
@@ -35,7 +36,12 @@ class UserAva extends React.Component{
                             </div>
 
                             <div className="modal-body">
-                                <CropForm onAvaChange = {this.props.onAvaChange}/>
+                                <CropForm
+                                    onChange = {this.onChange}
+                                    defaultContent = {
+                                        <img style = {{maxWidth: '100%'}} className="mt-1" src = {firebaseProj.auth().currentUser.photoURL}/>
+                                    }
+                                />
                             </div>
                         </div>
                     </div>
@@ -57,6 +63,28 @@ class UserAva extends React.Component{
                 this.props.onAvaChange();
 
                 showSuccessMessage('Аватар удален');
+            }
+        );
+    }
+
+    async onChange(blob){
+        let ref = firebaseProj.storage().ref('/' + firebaseProj.auth().currentUser.uid + '.jpg');
+
+        await ref.put(blob);
+        let photo = await ref.getDownloadURL();
+
+        firebaseProj.auth().currentUser.updateProfile({
+            photoURL: photo
+        }).then(
+            () => {
+                this.props.onAvaChange();
+
+                this.setState({
+                    file: false,
+                    loaded: false
+                });
+
+                showSuccessMessage('Аватар изменен');
             }
         );
     }

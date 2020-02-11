@@ -38,7 +38,7 @@ function Header() {
                         </li>
 
                         <li className="dropdown-menu-item menu-account-item">
-                            <NavLink to = '/profile#updateForm'>Обновить аккаунт</NavLink>
+                            <NavLink to = '/update'>Обновить аккаунт</NavLink>
                         </li>
 
                         <li className="dropdown-menu-item menu-account-item">

@@ -1,6 +1,7 @@
 import UpdateError from "../Forms/Error";
-import {showDangerMessage, showSuccessMessage} from "../../messages";
+import {showDangerMessage, showSuccessMessage} from "js/messages";
 import firebaseProj from 'js/fareConfig';
+import CropForm from "../Crop/CropForm";
 
 require("bootstrap");
 require("babel-polyfill");
@@ -25,6 +26,9 @@ class ProfileForm extends React.Component{
             <form onSubmit={this.updateUser}>
                 <UpdateError error = {this.state.updateError}/>
 
+                <CropForm/>
+
+                
                 <input
                     type="text"
                     name = "userName"
@@ -36,27 +40,6 @@ class ProfileForm extends React.Component{
                 <label className="text-danger text-small d-block mb-3">
                     {this.state.fieldsError.userName}
                 </label>
-
-                <div className="custom-file mb-3">
-                    <input
-                        type="file"
-                        accept="image"
-                        name = "userPhoto"
-                        onChange={this.onFormChange}
-                        className="custom-file-input"
-                        placeholder="Выберите фото"/>
-
-                    {
-                        this.state.fieldsError.userPhoto ?
-                            <label className="text-danger text-small custom-file-label">
-                                {this.state.fieldsError.userPhoto}
-                            </label>
-                                :
-                            <label className="custom-file-label">
-                                Выберите фото
-                            </label>
-                    }
-                </div>
 
 
                 <input
@@ -154,8 +137,6 @@ class ProfileForm extends React.Component{
             )
             .then(
                 () => {
-                    this.props.onProfileChange();
-
                     showSuccessMessage('Профиль обновлен');
 
                     this.setState({

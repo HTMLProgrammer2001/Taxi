@@ -1,18 +1,13 @@
 import 'firebase/storage';
 import 'firebase/auth';
+import {Link} from 'react-router-dom';
 
 import Layout from 'js/Layout';
 
 import UserAva from './UserAva';
 import UserInfo from './UserInfo';
-import ProfileForm from './ProfileForm';
 
 class Profile extends React.Component{
-    componentDidMount(){
-        if(location.hash)
-            $(location.hash).modal('show');
-    }
-
     constructor(props){
         super(props);
 
@@ -29,20 +24,7 @@ class Profile extends React.Component{
                 <div className="col-sm-9 col-md-6">
                     <UserInfo/>
 
-                    <a className="btn btn-link" data-toggle = "modal" href = "#updateForm">Обновить профиль</a>
-
-                    <div className="modal" role = "dialog" id="updateForm">
-                        <div className="modal-dialog" role = "document">
-                            <div className="modal-content">
-                                <div className="modal-header d-flex justify-content-end">
-                                    <span data-dismiss = 'modal' className="cursor">&times;</span>
-                                </div>
-                                <div className="modal-body">
-                                    <ProfileForm onProfileChange = {this.onProfileChange}/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <Link to="/update" className="btn btn-link">Обновить профиль</Link>
                 </div>
             </div>
         );
