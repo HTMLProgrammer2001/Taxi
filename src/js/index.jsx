@@ -19,6 +19,8 @@ const Profile = React.lazy( () => import('./Components/Profile/') );
 const Dashboard = React.lazy( () => import('./Components/Dashboard/') );
 const History = React.lazy( () => import('./Components/History/') );
 
+import Test from './Components/Profile/t.jsx';
+
 import Animation from './Components/Load/';
 
 import reducer from './Reducers/';
@@ -33,6 +35,7 @@ ReactDOM.render(
                 <Route path = "/profile" component = {Profile}/>
                 <Route path = "/dashboard" component = {Dashboard}/>
                 <Route path = "/history" component = {History}/>
+                <Route path = "/test" component = {Test}/>
             </React.Suspense>
         </Router>
     </Provider>,

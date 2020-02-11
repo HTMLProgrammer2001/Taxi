@@ -1,3 +1,5 @@
+import CropForm from "./Crop/CropForm";
+
 require('babel-polyfill');
 
 import {showDangerMessage, showSuccessMessage} from "../../messages";
@@ -7,15 +9,7 @@ class UserAva extends React.Component{
     constructor(props){
         super(props);
 
-        this.onPhotoChange = this.onPhotoChange.bind(this);
-        this.onUpdateButClick = this.onUpdateButClick.bind(this);
         this.onDeleteButClick = this.onDeleteButClick.bind(this);
-
-        this.state = {
-            file: null,
-            message: '',
-            updated: false
-        }
     }
 
     render(){
@@ -26,17 +20,26 @@ class UserAva extends React.Component{
                     className="w-100 mb-3"
                     alt=""/>
 
-                <input
-                    type = "file"
-                    className = "d-none"
-                    id = "userAva"
-                    onChange = {this.onPhotoChange}
-                />
-
-                <label
-                    onClick={this.onUpdateButClick}
+                <div
                     className="btn-primary btn btn-block"
-                    htmlFor="userAva">{this.state.message ? this.state.message : 'Обновить фото'}</label>
+                    data-toggle = "modal"
+                    data-target = "#changeAva">
+                    {this.state.message ? this.state.message : 'Обновить фото'}
+                </div>
+
+                <div className="modal" role="dialog" id="changeAva">
+                    <div className="modal-dialog" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header d-flex justify-content-end">
+                                <span data-dismiss = 'modal' className="cursor">&times;</span>
+                            </div>
+
+                            <div className="modal-body">
+                                <CropForm onAvaChange = {this.props.onAvaChange}/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div
                     className="btn btn-danger btn-block mt-1"
@@ -44,69 +47,6 @@ class UserAva extends React.Component{
                 >Удалить фото</div>
             </div>
         );
-    }
-
-    async onUpdateButClick(e){
-        if(!this.state.updated)
-            return;
-        else
-            e.preventDefault();
-
-        let file = this.state.file,
-            ref = firebaseProj.storage().ref(
-                '/' + firebaseProj.auth().currentUser.uid + file.name.slice(file.name.lastIndexOf('.'))
-            );
-
-            await ref.put(file);
-            let photo = await ref.getDownloadURL();
-
-            firebaseProj.auth().currentUser.updateProfile({
-                photoURL: photo
-            }).then(
-                () => {
-                    this.setState({
-                        updated: false,
-                        message: ''
-                    });
-
-                    this.props.onAvaChange();
-
-                    showSuccessMessage('Аватар изменен');
-                }
-            );
-    }
-
-    onPhotoChange(e){
-        let file = e.target.files[0];
-
-        //check file on errors
-        if(!file.type.includes('image')){
-            showDangerMessage('Файл должен быть фотографией');
-
-            this.setState({
-                message: '',
-                updated: false
-            });
-
-            return;
-        }
-
-        if(file.size > 5*1024*1024){
-            showDangerMessage('Файл превышает максимальный размер');
-
-            this.setState({
-                message: '',
-                updated: false
-            });
-
-            return;
-        }
-
-        this.setState({
-            message: 'Загрузить',
-            file,
-            updated: true
-        });
     }
 
     onDeleteButClick(){
