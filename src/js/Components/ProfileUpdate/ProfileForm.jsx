@@ -3,7 +3,9 @@ import {showDangerMessage, showSuccessMessage} from "js/messages";
 import firebaseProj from 'js/fareConfig';
 import CropForm from "../Crop/CropForm";
 
-require("bootstrap");
+import 'firebase/storage';
+import 'firebase/auth';
+
 require("babel-polyfill");
 
 class ProfileForm extends React.Component{
@@ -13,6 +15,7 @@ class ProfileForm extends React.Component{
         //bind Events
         this.onFormChange = this.onFormChange.bind(this);
         this.updateUser = this.updateUser.bind(this);
+        this.onChange = this.onChange.bind(this);
 
         this.state = {
             fieldsValue: {},
@@ -26,7 +29,8 @@ class ProfileForm extends React.Component{
             <form onSubmit={this.updateUser}>
                 <UpdateError error = {this.state.updateError}/>
 
-                <CropForm/>
+                <CropForm
+                    onChange = {this.onChange}/>
 
                 
                 <input
@@ -34,7 +38,7 @@ class ProfileForm extends React.Component{
                     name = "userName"
                     onInput={this.onFormChange}
                     value={this.state.fieldsValue.userName}
-                    className="form-control"
+                    className="form-control mt-5"
                     placeholder="Введите новое имя"/>
 
                 <label className="text-danger text-small d-block mb-3">
@@ -71,7 +75,7 @@ class ProfileForm extends React.Component{
                 <button
                     type = "submit"
                     name = "updating"
-                    className="btn btn-primary">
+                    className="btn btn-primary btn-block">
                     Обновить
                 </button>
             </form>
@@ -90,6 +94,26 @@ class ProfileForm extends React.Component{
                     [tar.name]: val
                 }
             }));
+    }
+
+    async onChange(blob){
+        let ref = firebaseProj.storage().ref('/' + firebaseProj.auth().currentUser.uid + '.jpg');
+
+        await ref.put(blob);
+        let photo = await ref.getDownloadURL();
+
+        firebaseProj.auth().currentUser.updateProfile({
+            photoURL: photo
+        }).then(
+            () => {
+                this.setState({
+                    file: false,
+                    loaded: false
+                });
+
+                showSuccessMessage('Аватар изменен');
+            }
+        );
     }
 
     async updateUser(event){
