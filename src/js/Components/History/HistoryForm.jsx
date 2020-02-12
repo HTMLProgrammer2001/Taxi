@@ -21,7 +21,7 @@ class HistoryForm extends React.Component{
 
     render(){
         return (
-                <form>
+                <form className="mt-sm-3">
                     <div className="form-group">
                         <label htmlFor="driver">Водитель:</label>
 

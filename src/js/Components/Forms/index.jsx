@@ -12,7 +12,7 @@ function Forms(){
                     <Registration/>
                 </div>
 
-                <div className="col-sm-6">
+                <div className="col-sm-6 mt-sm-3">
                     <h3>Авторизация</h3>
                     <Auth/>
                 </div>

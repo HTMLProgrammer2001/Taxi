@@ -14,17 +14,27 @@ function Header() {
                 <img src = {require('assets/logo.jpg')} alt="Logo" className="ml-3 logo-image"/>
             </div>
 
+            <div className="burger" onClick={
+                (e) => e.target.classList.toggle('active')
+            }>
+                <span className="burger-item"></span>
+            </div>
+
             <div className="menu">
                 <NavLink activeClassName="active" className="mr-3" to = "/profile">Профиль</NavLink>
                 <NavLink activeClassName="active" className="mr-3" to = "/history">История</NavLink>
                 <NavLink activeClassName="active" to = "/dashboard" className="mr-3">Доска объявлений</NavLink>
 
-                <div className="dropdown">
+                <div className="dropdown dropdown-menu-md-right">
                     <div
                         className = "menu-account dropdown-toggle"
                         data-toggle = "dropdown">
                             <div className="menu-account-photo-wrapper">
-                                <img src = {firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')} className="menu-account-photo"/>
+                                <img
+                                    src = {
+                                        firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')
+                                    }
+                                    className="menu-account-photo"/>
                             </div>
 
                             <div className="menu-account-info">
