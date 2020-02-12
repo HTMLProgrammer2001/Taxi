@@ -27,8 +27,10 @@ class CropAnimation{
         this.draw = this.draw.bind(this);
 
         //bind events
-        this.elem.onmousedown = this.onMouseDown.bind(this);
-        this.elem.onmousemove = this.onMouseMove.bind(this);
+        this.elem.addEventListener('mousedown', this.onMouseDown.bind(this));
+        this.elem.addEventListener('mousemove', this.onMouseMove.bind(this));
+        this.elem.addEventListener('touchstart', this.onTouchStart.bind(this));
+        this.elem.addEventListener('touchmove', this.onTouchMove.bind(this));
 
         this.draw();
     }
@@ -72,8 +74,25 @@ class CropAnimation{
     }
 
     close(){
-        this.elem.onmousedown = null;
-        this.elem.onmousemove = null;
+        this.elem.removeEventListener('mousedown', this.onMouseDown.bind(this));
+        this.elem.removeEventListener('mousemove', this.onMouseMove.bind(this));
+        this.elem.removeEventListener('touchstart', this.onTouchStart.bind(this));
+        this.elem.removeEventListener('touchmove', this.onTouchMove.bind(this));
+    }
+    
+    onTouchStart(e){
+        e.preventDefault();
+        let touches = e.targetTouches,
+            offsetY = touches[0].clientY - e.target.getBoundingClientRect().top,
+            offsetX = touches[0].clientX - e.target.getBoundingClientRect().left;
+
+        this.touch = {
+            x: offsetX,
+            y: offsetY,
+            dot: Math.sqrt(
+                (this.selected.x + this.selected.w - offsetX)**2 + (this.selected.y + this.selected.h - offsetY)**2
+            ) < this.opts.circleRadius
+        };
     }
 
     onMouseDown(e){
@@ -86,17 +105,14 @@ class CropAnimation{
         };
     }
 
-    onMouseMove(e){
-        if(!e.which)
-            return;
-
+    onMove(point){
         let w = this.elem.offsetWidth,
             h = this.elem.offsetHeight;
 
         if(this.touch.dot){
             //resize image
-            this.selected.w = e.offsetX - this.selected.x;
-            this.selected.h = e.offsetY - this.selected.y;
+            this.selected.w = point.offsetX - this.selected.x;
+            this.selected.h = point.offsetY - this.selected.y;
 
             if(this.selected.w + this.selected.x > w)
                 this.selected.w = w - this.selected.x;
@@ -106,8 +122,8 @@ class CropAnimation{
         }
         else{
             //move image
-            this.selected.x += e.offsetX - this.touch.x;
-            this.selected.y += e.offsetY - this.touch.y;
+            this.selected.x += point.offsetX - this.touch.x;
+            this.selected.y += point.offsetY - this.touch.y;
 
             if(this.selected.x < 0)
                 this.selected.x = 0;
@@ -120,6 +136,30 @@ class CropAnimation{
             if(this.selected.y + this.selected.h > h)
                 this.selected.y = h - this.selected.h;
         }
+    }
+
+    onTouchMove(e){
+        let touch = e.targetTouches[0];
+
+        touch.offsetX = touch.clientX - this.elem.getBoundingClientRect().left;
+        touch.offsetY = touch.clientY - this.elem.getBoundingClientRect().top;
+
+        this.onMove(touch);
+
+        this.touch = {
+            x: touch.offsetX,
+            y: touch.offsetY,
+            dot: this.touch.dot
+        };
+
+        this.draw();
+    }
+
+    onMouseMove(e){
+        if(!e.which)
+            return;
+
+        this.onMove(e);
 
         this.touch = {
             x: e.offsetX,
