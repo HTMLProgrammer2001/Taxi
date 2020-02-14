@@ -1,11 +1,10 @@
 import RegError from './Error';
 import firebaseProj from 'js/fareConfig';
 import {toast} from 'react-toastify';
+import FormInput from './FormInput';
 
 import {
-    Card, CardBody,
-    CardTitle, Form, FormGroup, Input, FormFeedback,
-    Button
+    Card, CardBody, CardTitle, Form, Button
 } from 'reactstrap';
 
 class RegistryForm extends React.Component{
@@ -31,61 +30,37 @@ class RegistryForm extends React.Component{
                     <Form onSubmit={this.addUser}>
                         <RegError error = {this.state.registrationError} successRedirect='/profile'/>
 
-                        <FormGroup>
-                            <Input
-                                placeholder = "Введите email"
-                                name = "userEmail"
-                                type="email"
-                                onChange = {this.onFieldChange}
-                                value = {this.state.fieldsValue.userEmail || ''}
-                                invalid = {!!this.state.fieldsError.userEmail}
-                                valid = {!this.state.fieldsError.userEmail && this.state.fieldsValue.userEmail}
-                            />
-                            <FormFeedback invalid>{this.state.fieldsError.userEmail}</FormFeedback>
-                            <FormFeedback valid>OK!</FormFeedback>
-                        </FormGroup>
+                        <FormInput
+                            onChange = {this.onFieldChange}
+                            name = "userEmail"
+                            type = "email"
+                            placeholder = "Введите email"
+                            state = {this.state}
+                        />
 
-                        <FormGroup>
-                            <Input
-                                placeholder = "Введите имя пользователя"
-                                name = "userName"
-                                type="text"
-                                onChange = {this.onFieldChange}
-                                value = {this.state.fieldsValue.userName || ''}
-                                invalid = {!!this.state.fieldsError.userName}
-                                valid = {!this.state.fieldsError.userName && this.state.fieldsValue.userName}
-                            />
-                            <FormFeedback invalid>{this.state.fieldsError.userName}</FormFeedback>
-                            <FormFeedback valid>OK!</FormFeedback>
-                        </FormGroup>
+                        <FormInput
+                            onChange = {this.onFieldChange}
+                            name = "userName"
+                            type = "text"
+                            placeholder = "Введите имя"
+                            state = {this.state}
+                        />
 
-                        <FormGroup>
-                            <Input
-                                placeholder = "Введите пароль"
-                                name = "userPassword"
-                                type="password"
-                                onChange = {this.onFieldChange}
-                                value = {this.state.fieldsValue.userPassword || ''}
-                                invalid = {!!this.state.fieldsError.userPassword}
-                                valid = {!this.state.fieldsError.userPassword && this.state.fieldsValue.userPassword}
-                            />
-                            <FormFeedback invalid>{this.state.fieldsError.userPassword}</FormFeedback>
-                            <FormFeedback valid>OK!</FormFeedback>
-                        </FormGroup>
+                        <FormInput
+                            onChange = {this.onFieldChange}
+                            name = "userPassword"
+                            type = "password"
+                            placeholder = "Введите пароль"
+                            state = {this.state}
+                        />
 
-                        <FormGroup>
-                            <Input
-                                placeholder = "Повторите пароль"
-                                name = "userConfirmPassword"
-                                type="password"
-                                onChange = {this.onFieldChange}
-                                value = {this.state.fieldsValue.userConfirmPassword || ''}
-                                invalid = {!!this.state.fieldsError.userConfirmPassword}
-                                valid = {!this.state.fieldsError.userConfirmPassword && this.state.fieldsValue.userConfirmPassword}
-                            />
-                            <FormFeedback invalid>{this.state.fieldsError.userConfirmPassword}</FormFeedback>
-                            <FormFeedback valid>OK!</FormFeedback>
-                        </FormGroup>
+                        <FormInput
+                            onChange = {this.onFieldChange}
+                            name = "userConfirmPassword"
+                            type = "password"
+                            placeholder = "Повторите пароль"
+                            state = {this.state}
+                        />
 
                         <Button outline color = "primary">Зарегистрироваться</Button>
                     </Form>
@@ -164,8 +139,6 @@ class RegistryForm extends React.Component{
                 })
             )
             .then( () => {
-                toast('Ошибка сохранения', {type: toast.TYPE.ERROR});
-
                 this.setState({
                     registrationError: ''
                 });
@@ -174,6 +147,8 @@ class RegistryForm extends React.Component{
             })
             .catch( (error) => {
                 //redraw component to display errors
+                toast('Ошибка сохранения', {type: toast.TYPE.ERROR});
+
                 this.setState({
                     registrationError: error.message
                 });
