@@ -2,20 +2,22 @@ import 'firebase/auth';
 
 import Auth from './AuthForm.jsx';
 import Registration from './RegForm.jsx';
+import {Col} from 'reactstrap';
+import {ToastContainer, toast} from "react-toastify";
 
 function Forms(){
     return (
         <div className="forms">
             <div className="container w-75 row">
-                <div className="col-sm-6 border-right">
-                    <h3>Регистрация</h3>
+                <Col sm="6">
                     <Registration/>
-                </div>
+                </Col>
 
-                <div className="col-sm-6 mt-sm-3">
-                    <h3>Авторизация</h3>
+                <Col sm="6">
                     <Auth/>
-                </div>
+                </Col>
+
+                <ToastContainer position={toast.POSITION.BOTTOM_RIGHT}/>
             </div>
         </div>
     )

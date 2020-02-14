@@ -1,6 +1,12 @@
 import AuthError from './Error';
-import {showDangerMessage} from "../../messages";
 import firebaseProj from 'js/fareConfig';
+import {toast} from 'react-toastify';
+
+import {
+    Card, CardBody,
+    CardTitle, Form, FormGroup, Input, FormFeedback,
+    Button
+} from 'reactstrap';
 
 class AuthForm extends React.Component{
     constructor(props){
@@ -18,35 +24,47 @@ class AuthForm extends React.Component{
 
     render() {
         return (
-            <form onSubmit={this.signUp}>
-                <AuthError error = {this.state.authorizedError} successRedirect = '/dashboard'/>
+            <Card>
+                <CardBody>
+                    <CardTitle>Авторизация</CardTitle>
 
-                <input
-                    type="email"
-                    name = "userEmail"
-                    onChange = {this.onFieldChange}
-                    value = {this.state.fieldsValue.userEmail || ''}
-                    className="form-control"
-                    placeholder="Введите email"/>
+                    <Form onSubmit = {this.signUp}>
+                        <AuthError
+                            error = {this.state.authorizedError}
+                            successRedirect = '/dashboard'>.</AuthError>
 
-                <label className="text-danger" htmlFor="userEmail">
-                    {this.state.fieldsError.userEmail}
-                </label>
+                        <FormGroup>
+                            <Input
+                                placeholder = "Введите email"
+                                name = "userEmail"
+                                type="email"
+                                value = {this.state.fieldsValue.userEmail || ''}
+                                onChange = {this.onFieldChange}
+                                invalid = {!!this.state.fieldsError.userEmail}
+                                valid = {!this.state.fieldsError.userEmail && this.state.fieldsValue.userEmail}
+                            />
+                            <FormFeedback invalid>{this.state.fieldsError.userEmail}</FormFeedback>
+                            <FormFeedback valid>OK!</FormFeedback>
+                        </FormGroup>
 
-                <input
-                    type="password"
-                    name = "userPassword"
-                    onChange = {this.onFieldChange}
-                    value = {this.state.fieldsValue.userPassword || ''}
-                    className="form-control"
-                    placeholder="Введите пароль"/>
+                        <FormGroup>
+                            <Input
+                                placeholder = "Введите пароль"
+                                name = "userPassword"
+                                type="password"
+                                value = {this.state.fieldsValue.userPassword || ''}
+                                onChange = {this.onFieldChange}
+                                invalid = {!!this.state.fieldsError.userPassword}
+                                valid = {!this.state.fieldsError.userPassword && this.state.fieldsValue.userPassword}
+                            />
+                            <FormFeedback invalid>{this.state.fieldsError.userPassword}</FormFeedback>
+                            <FormFeedback valid>OK!</FormFeedback>
+                        </FormGroup>
 
-                <label className="text-danger mb-3 d-block" htmlFor="userPassword">
-                    {this.state.fieldsError.userPassword}
-                </label>
-
-                <button type = "submit" name = "authorization" className="btn btn-primary">Авторизироваться</button>
-            </form>
+                        <Button outline color = "primary">Войти</Button>
+                    </Form>
+                </CardBody>
+            </Card>
         )
     }
 
@@ -59,6 +77,12 @@ class AuthForm extends React.Component{
               [tar.name]: tar.value
           }
         }) );
+
+        this.setState( (state) => {
+            return {
+                fieldsError: this.testForm(state.fieldsValue)
+            }
+        } );
     }
 
     signUp(event){
@@ -73,7 +97,7 @@ class AuthForm extends React.Component{
         });
 
         if(Object.keys(errors).length){
-            showDangerMessage('Ошибки в заполнении формы авторизации');
+            toast('Ошибки в заполнении формы авторизации', {type: toast.TYPE.ERROR});
             return;
         }
 
@@ -88,7 +112,7 @@ class AuthForm extends React.Component{
            })
         }, (error) => {
             //send authorize error message
-            showDangerMessage('Ошибка авторизации');
+            toast('Ошибка авторизации', {type: toast.TYPE.ERROR});
 
             this.setState({
                 authorizedError: error.message
@@ -97,13 +121,15 @@ class AuthForm extends React.Component{
         });
     }
 
-    testForm(){
+    testForm(testState){
+        let state = testState || this.state.fieldsValue;
+
         let errors = {};
 
-        if(!(new RegExp('.+@.{3,8}\..{3,8}').test(this.state.fieldsValue.userEmail)))
+        if(!(new RegExp('.+@.{3,8}\..{3,8}').test(state.userEmail)))
             errors.userEmail = 'Введите корректный email';
 
-        if(!this.state.fieldsValue.userPassword || this.state.fieldsValue.userPassword.length < 8)
+        if(!this.state.fieldsValue.userPassword || state.userPassword.length < 8)
             errors.userPassword = 'Минимальная длина пароля 8 символов';
 
         return errors;

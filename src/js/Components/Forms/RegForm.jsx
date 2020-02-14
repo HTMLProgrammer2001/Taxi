@@ -1,13 +1,19 @@
 import RegError from './Error';
-import {showDangerMessage} from "../../messages";
 import firebaseProj from 'js/fareConfig';
+import {toast} from 'react-toastify';
+
+import {
+    Card, CardBody,
+    CardTitle, Form, FormGroup, Input, FormFeedback,
+    Button
+} from 'reactstrap';
 
 class RegistryForm extends React.Component{
     constructor(props){
         super(props);
 
         //bind Events
-        this.onFormChange = this.onFormChange.bind(this);
+        this.onFieldChange = this.onFieldChange.bind(this);
         this.addUser = this.addUser.bind(this);
 
         this.state = {
@@ -18,69 +24,77 @@ class RegistryForm extends React.Component{
     }
 
     render(){
-        return (
-            <form onSubmit={this.addUser}>
-                <RegError error = {this.state.registrationError} successRedirect = '/profile'/>
+        return(
+          <Card>
+              <CardBody>
+                  <CardTitle>Регистрация</CardTitle>
+                    <Form onSubmit={this.addUser}>
+                        <RegError error = {this.state.registrationError} successRedirect='/profile'/>
 
-                <input
-                    type="email"
-                    name = "userEmail"
-                    onChange = {this.onFormChange}
-                    value = {this.state.fieldsValue.userEmail || ''}
-                    className="form-control"
-                    placeholder="Введите email"/>
+                        <FormGroup>
+                            <Input
+                                placeholder = "Введите email"
+                                name = "userEmail"
+                                type="email"
+                                onChange = {this.onFieldChange}
+                                value = {this.state.fieldsValue.userEmail || ''}
+                                invalid = {!!this.state.fieldsError.userEmail}
+                                valid = {!this.state.fieldsError.userEmail && this.state.fieldsValue.userEmail}
+                            />
+                            <FormFeedback invalid>{this.state.fieldsError.userEmail}</FormFeedback>
+                            <FormFeedback valid>OK!</FormFeedback>
+                        </FormGroup>
 
-                <label className="text-danger text-small">
-                    {this.state.fieldsError.userEmail}
-                </label>
+                        <FormGroup>
+                            <Input
+                                placeholder = "Введите имя пользователя"
+                                name = "userName"
+                                type="text"
+                                onChange = {this.onFieldChange}
+                                value = {this.state.fieldsValue.userName || ''}
+                                invalid = {!!this.state.fieldsError.userName}
+                                valid = {!this.state.fieldsError.userName && this.state.fieldsValue.userName}
+                            />
+                            <FormFeedback invalid>{this.state.fieldsError.userName}</FormFeedback>
+                            <FormFeedback valid>OK!</FormFeedback>
+                        </FormGroup>
 
-                <input
-                    type="text"
-                    name = "userName"
-                    onChange = {this.onFormChange}
-                    value = {this.state.fieldsValue.userName || ''}
-                    className="form-control"
-                    placeholder="Введите имя"/>
+                        <FormGroup>
+                            <Input
+                                placeholder = "Введите пароль"
+                                name = "userPassword"
+                                type="password"
+                                onChange = {this.onFieldChange}
+                                value = {this.state.fieldsValue.userPassword || ''}
+                                invalid = {!!this.state.fieldsError.userPassword}
+                                valid = {!this.state.fieldsError.userPassword && this.state.fieldsValue.userPassword}
+                            />
+                            <FormFeedback invalid>{this.state.fieldsError.userPassword}</FormFeedback>
+                            <FormFeedback valid>OK!</FormFeedback>
+                        </FormGroup>
 
-                <label className="text-danger text-small">
-                    {this.state.fieldsError.userName}
-                </label>
+                        <FormGroup>
+                            <Input
+                                placeholder = "Повторите пароль"
+                                name = "userConfirmPassword"
+                                type="password"
+                                onChange = {this.onFieldChange}
+                                value = {this.state.fieldsValue.userConfirmPassword || ''}
+                                invalid = {!!this.state.fieldsError.userConfirmPassword}
+                                valid = {!this.state.fieldsError.userConfirmPassword && this.state.fieldsValue.userConfirmPassword}
+                            />
+                            <FormFeedback invalid>{this.state.fieldsError.userConfirmPassword}</FormFeedback>
+                            <FormFeedback valid>OK!</FormFeedback>
+                        </FormGroup>
 
-                <input
-                    type="password"
-                    name = "userPassword"
-                    onChange = {this.onFormChange}
-                    value = {this.state.fieldsValue.userPassword || ''}
-                    className="form-control"
-                    placeholder="Введите пароль"/>
-
-                <label className="text-danger text-small">
-                    {this.state.fieldsError.userPassword}
-                </label>
-
-                <input
-                    type="password"
-                    name = "confirmPassword"
-                    onChange = {this.onFormChange}
-                    value = {this.state.fieldsValue.confirmPassword || ''}
-                    className="form-control"
-                    placeholder="Подтвердите пароль"/>
-
-                <label className="text-danger text-small d-block mb-3">
-                    {this.state.fieldsError.confirmPassword}
-                </label>
-
-                <button
-                    type = "submit"
-                    name = "registing"
-                    className="btn btn-primary">
-                        Зарегистрироваться
-                </button>
-            </form>
-        )
+                        <Button outline color = "primary">Зарегистрироваться</Button>
+                    </Form>
+              </CardBody>
+          </Card>
+        );
     }
 
-    onFormChange(event){
+    onFieldChange(event){
         let tar = event.target;
 
         this.setState(
@@ -90,6 +104,14 @@ class RegistryForm extends React.Component{
                     [tar.name]: tar.value
                 }
             }));
+
+        this.setState(
+            (state) => {
+                return {
+                    fieldsError: this.testForm(state.fieldsValue)
+                }
+            }
+        );
     }
 
     addUser(event){
@@ -103,7 +125,7 @@ class RegistryForm extends React.Component{
         });
 
         if(Object.keys(errors).length){
-            showDangerMessage('Ошибки в заполнении формы регистрации');
+            toast('Ошибки в заполнении формы регистрации', {type: toast.TYPE.ERROR});
             return;
         }
 
@@ -111,20 +133,21 @@ class RegistryForm extends React.Component{
         this.createUser();
     }
 
-    testForm(){
-        let errors = {};
+    testForm(testState){
+        let errors = {},
+            state = testState || this.state.fieldsValue;
 
-        if(!(new RegExp('.+@.{3,8}\..{3,8}').test(this.state.fieldsValue.userEmail)))
+        if(!(new RegExp('.+@.{3,8}\..{3,8}').test(state.userEmail)))
             errors.userEmail = 'Введите корректный email';
 
-        if(!this.state.fieldsValue.userName || this.state.fieldsValue.userName.length < 3)
+        if(!state.userName || state.userName.length < 3)
             errors.userName = 'Минимальная длина имени 3 символа';
 
-        if(!this.state.fieldsValue.userPassword || this.state.fieldsValue.userPassword.length < 8)
+        if(!state.userPassword || state.userPassword.length < 8)
             errors.userPassword = 'Минимальная длина пароля 8 символов';
 
-        if(this.state.fieldsValue.confirmPassword !== this.state.fieldsValue.userPassword)
-            errors.confirmPassword = 'Пароли не совпадают';
+        if(state.userConfirmPassword !== state.userPassword)
+            errors.userConfirmPassword = 'Пароли не совпадают';
 
         return errors;
     }
@@ -141,7 +164,7 @@ class RegistryForm extends React.Component{
                 })
             )
             .then( () => {
-                showDangerMessage('Ошибка сохранения');
+                toast('Ошибка сохранения', {type: toast.TYPE.ERROR});
 
                 this.setState({
                     registrationError: ''
