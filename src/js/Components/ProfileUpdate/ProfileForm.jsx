@@ -1,10 +1,13 @@
 import UpdateError from "../Error";
-import {showDangerMessage, showSuccessMessage} from "js/messages";
 import firebaseProj from 'js/fareConfig';
 import CropForm from "../Crop/CropForm";
 
 import 'firebase/storage';
 import 'firebase/auth';
+import {toast} from 'react-toastify';
+
+import {Button, Card, CardBody, CardTitle, Form} from "reactstrap";
+import FormInput from "../FormInput";
 
 require("babel-polyfill");
 
@@ -26,60 +29,46 @@ class ProfileForm extends React.Component{
 
     render(){
         return (
-            <form onSubmit={this.updateUser}>
-                <UpdateError error = {this.state.updateError}/>
+            <Card>
+                <CardBody>
+                    <CardTitle>Обновить профиль</CardTitle>
 
-                <CropForm
-                    onChange = {this.onChange}/>
+                    <Form onSubmit = {this.updateUser}>
+                        <UpdateError error = {this.state.authorizedError}>.</UpdateError>
 
-                
-                <input
-                    type="text"
-                    name = "userName"
-                    onInput={this.onFormChange}
-                    value={this.state.fieldsValue.userName}
-                    className="form-control mt-5"
-                    placeholder="Введите новое имя"/>
+                        <CropForm
+                            onChange = {this.onChange}/>
 
-                <label className="text-danger text-small d-block mb-3">
-                    {this.state.fieldsError.userName}
-                </label>
+                        <FormInput
+                            onChange = {this.onFormChange}
+                            placeholder = "Введите новое имя"
+                            name = "userName"
+                            type = "text"
+                            className = "mt-3"
+                            state = {this.state}
+                        />
 
+                        <FormInput
+                            onChange = {this.onFormChange}
+                            placeholder = "Введите новый пароль"
+                            name = "userPassword"
+                            type = "password"
+                            state = {this.state}
+                        />
 
-                <input
-                    type="password"
-                    name = "userPassword"
-                    onInput={this.onFormChange}
-                    value={this.state.fieldsValue.userPassword}
-                    className="form-control"
-                    placeholder="Введите новый пароль"/>
+                        <FormInput
+                            onChange = {this.onFormChange}
+                            placeholder = "Повторите пароль"
+                            name = "confirmPassword"
+                            type = "password"
+                            state = {this.state}
+                        />
 
-                <label className="text-danger text-small d-block mb-3">
-                    {this.state.fieldsError.userPassword}
-                </label>
-
-
-                <input
-                    type="password"
-                    name = "confirmPassword"
-                    onInput={this.onFormChange}
-                    value={this.state.fieldsValue.confirmPassword}
-                    className="form-control"
-                    placeholder="Подтвердите пароль"/>
-
-                <label className="text-danger text-small d-block mb-3">
-                    {this.state.fieldsError.confirmPassword}
-                </label>
-
-
-                <button
-                    type = "submit"
-                    name = "updating"
-                    className="btn btn-primary btn-block">
-                    Обновить
-                </button>
-            </form>
-        )
+                        <Button outline color = "primary">Обновить</Button>
+                    </Form>
+                </CardBody>
+            </Card>
+        );
     }
 
     onFormChange(event){
@@ -94,6 +83,13 @@ class ProfileForm extends React.Component{
                     [tar.name]: val
                 }
             }));
+
+        this.setState({
+            fieldsError: {
+                ...this.state.fieldsError,
+                [tar.name]: this.testForm(tar.name, tar.value)[tar.name]
+            }
+        })
     }
 
     async onChange(blob){
@@ -111,7 +107,7 @@ class ProfileForm extends React.Component{
                     loaded: false
                 });
 
-                showSuccessMessage('Аватар изменен');
+                toast('Аватар изменен', {type: toast.TYPE.SUCCESS});
             }
         );
     }
@@ -127,7 +123,7 @@ class ProfileForm extends React.Component{
                 fieldsError: errors
             });
 
-            showDangerMessage('Ошибки заполнения формы');
+            toast('Ошибки заполнения формы', {type: toast.TYPE.ERROR});
 
             return;
         }
@@ -161,7 +157,7 @@ class ProfileForm extends React.Component{
             )
             .then(
                 () => {
-                    showSuccessMessage('Профиль обновлен');
+                    toast('Профиль обновлен', {type: toast.TYPE.SUCCESS});
 
                     this.setState({
                         fieldsValue: {},
@@ -172,7 +168,7 @@ class ProfileForm extends React.Component{
             )
             .catch( (error) => {
                 //redraw component to display errors
-                showDangerMessage('Ошибка обновления');
+                toast('Ошибка обновления', {type: toast.TYPE.ERROR});
 
                 this.setState({
                     updateError: error.message
@@ -180,16 +176,28 @@ class ProfileForm extends React.Component{
             });
     }
 
-    testForm(){
-        let errors = {};
+    testForm(fieldName, fieldValue){
+        let errors = {},
+            state = this.state.fieldsValue;
 
-        if(this.state.fieldsValue.userName && this.state.fieldsValue.userName < 3)
+        state[fieldName] = fieldValue;
+
+        if(
+            (fieldName === 'userName' || !fieldName) &&
+            (this.state.fieldsValue.userName && this.state.fieldsValue.userName < 3)
+        )
             errors.userName = 'Минимальная длина имени 3 символа';
 
-        if(this.state.fieldsValue.userPassword && this.state.fieldsValue.userPassword.length < 8)
+        if(
+            (fieldName === 'userPassword' || !fieldName) &&
+            (this.state.fieldsValue.userPassword && this.state.fieldsValue.userPassword.length < 8)
+        )
             errors.userPassword = 'Минимальная длина пароля 8 символов';
 
-        if(this.state.fieldsValue.confirmPassword !== this.state.fieldsValue.userPassword)
+        if(
+            (fieldName === 'confirmPassword' || !fieldName) &&
+            (this.state.fieldsValue.confirmPassword !== this.state.fieldsValue.userPassword)
+        )
             errors.confirmPassword = 'Пароли не совпадают';
 
         //check & convert photo

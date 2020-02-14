@@ -87,9 +87,10 @@ class OrderForm extends React.Component{
                }
             }));
 
-        this.setState((state) => {
-            return {
-                fieldsError: this.testForm(state.fieldsValue)
+        this.setState({
+            fieldsError: {
+                ...this.state.fieldsError,
+                [tar.name]: this.testForm(tar.name, tar.value)[tar.name]
             }
         })
     }
@@ -149,17 +150,28 @@ class OrderForm extends React.Component{
 
     }
 
-    testForm(testState){
+    testForm(fieldName, fieldValue){
         let errors = {},
-            state = testState || this.state.fieldsValue;
+            state = this.state.fieldsValue;
 
-        if(!(new RegExp('\\+\\d{10}').test(state.orderPhone)))
+        state[fieldName] = fieldValue;
+
+        if(
+            (fieldName === 'orderPhone' || !fieldName) &&
+            !(new RegExp('\\+\\d{10}').test(state.orderPhone))
+        )
             errors.orderPhone = 'Введите корректный телефон(like +380501122333)';
 
-        if(!state.orderStart)
+        if(
+            (fieldName === 'orderStart' || !fieldName) &&
+            !state.orderStart
+        )
             errors.userName = 'Введите начальный адресс';
 
-        if(!state.orderDestination)
+        if(
+            (fieldName === 'orderDestination' || !fieldName) &&
+            !state.orderDestination
+        )
             errors.userName = 'Введите конечный адресс';
 
         return errors;
