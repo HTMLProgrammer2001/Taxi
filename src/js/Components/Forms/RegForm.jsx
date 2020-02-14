@@ -80,13 +80,12 @@ class RegistryForm extends React.Component{
                 }
             }));
 
-        this.setState(
-            (state) => {
-                return {
-                    fieldsError: this.testForm(state.fieldsValue)
-                }
+        this.setState({
+            fieldsError: {
+                ...this.state.fieldsError,
+                [tar.name]: this.testForm(tar.name, tar.value)[tar.name]
             }
-        );
+        });
     }
 
     addUser(event){
@@ -108,20 +107,34 @@ class RegistryForm extends React.Component{
         this.createUser();
     }
 
-    testForm(testState){
+    testForm(fieldName, fieldValue){
         let errors = {},
-            state = testState || this.state.fieldsValue;
+            state = this.state.fieldsValue;
 
-        if(!(new RegExp('.+@.{3,8}\..{3,8}').test(state.userEmail)))
+        state[fieldName] = fieldValue;
+
+        if(
+            (fieldName === 'userEmail' || !fieldName) &&
+            !(new RegExp('.+@.{3,8}\..{3,8}').test(state.userEmail))
+        )
             errors.userEmail = 'Введите корректный email';
 
-        if(!state.userName || state.userName.length < 3)
+        if(
+            (fieldName === 'userName' || !fieldName) &&
+            (!state.userName || state.userName.length < 3)
+        )
             errors.userName = 'Минимальная длина имени 3 символа';
 
-        if(!state.userPassword || state.userPassword.length < 8)
+        if(
+            (fieldName === 'userPassword' || !fieldName) &&
+            (!state.userPassword || state.userPassword.length < 8)
+        )
             errors.userPassword = 'Минимальная длина пароля 8 символов';
 
-        if(state.userConfirmPassword !== state.userPassword)
+        if(
+            (fieldName === 'userConfirmPassword' || !fieldName) &&
+            (state.userConfirmPassword !== state.userPassword)
+        )
             errors.userConfirmPassword = 'Пароли не совпадают';
 
         return errors;
