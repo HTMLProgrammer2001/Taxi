@@ -63,11 +63,12 @@ class AuthForm extends React.Component{
           }
         }) );
 
-        this.setState( (state) => {
-            return {
-                fieldsError: this.testForm(state.fieldsValue)
+        this.setState({
+            fieldsError: {
+                ...this.state.fieldsError,
+                [tar.name]: this.testForm(tar.name, tar.value)[tar.name]
             }
-        } );
+        });
     }
 
     signUp(event){
@@ -106,15 +107,21 @@ class AuthForm extends React.Component{
         });
     }
 
-    testForm(testState){
-        let state = testState || this.state.fieldsValue;
+    testForm(fieldName, fieldValue){
+        let state = this.state.fieldsValue,
+            errors = {};
 
-        let errors = {};
+        state[fieldName] = fieldValue;
 
-        if(!(new RegExp('.+@.{3,8}\..{3,8}').test(state.userEmail)))
+        if(
+            (!fieldName || fieldName === 'userEmail') &&
+            !(new RegExp('.+@.{3,8}\..{3,8}').test(state.userEmail))
+        )
             errors.userEmail = 'Введите корректный email';
 
-        if(!this.state.fieldsValue.userPassword || state.userPassword.length < 8)
+        if(
+            (!fieldName || fieldName === 'userPassword') &&
+            (!this.state.fieldsValue.userPassword || state.userPassword.length < 8))
             errors.userPassword = 'Минимальная длина пароля 8 символов';
 
         return errors;
