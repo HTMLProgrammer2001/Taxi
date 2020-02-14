@@ -47,17 +47,18 @@ class Dashboard extends React.Component{
                 >.</div>
 
                 <div>
-                    <div className="p-3 addOrderPopupBut bg-primary" data-toggle = "modal" data-target = "#addOrder">
+                    <div className="p-3 addOrderPopupBut bg-happy-fisher" data-toggle = "modal" data-target = "#addOrder">
                         <span>+</span>
                     </div>
 
                     <div className="modal" role = "dialog" id="addOrder">
                         <div className="modal-dialog" role = "document">
                             <div className="modal-content">
-                                <div className="modal-header d-flex justify-content-end">
-                                    <span data-dismiss = 'modal' className="cursor">&times;</span>
-                                </div>
                                 <div className="modal-body">
+                                    <div className="d-flex justify-content-end">
+                                        <span className="mr-2 cur-pointer" data-dismiss="modal">&times;</span>
+                                    </div>
+
                                     <OrderForm onCreate = {this.onOrderCreate}/>
                                 </div>
                             </div>

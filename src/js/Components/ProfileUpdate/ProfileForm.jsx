@@ -1,4 +1,4 @@
-import UpdateError from "../Forms/Error";
+import UpdateError from "../Error";
 import {showDangerMessage, showSuccessMessage} from "js/messages";
 import firebaseProj from 'js/fareConfig';
 import CropForm from "../Crop/CropForm";

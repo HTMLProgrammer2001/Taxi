@@ -139,9 +139,12 @@ body{
         position: relative;
 
         height: 100%;
-        padding: 0 1rem;
 
         cursor: pointer;
+
+        &::after{
+            display: none;
+        }
 
         &-photo{
             position: relative;
@@ -154,7 +157,6 @@ body{
                 width: 50px;
                 height: 50px;
                 padding: 0;
-                margin-right: .5rem;
 
                 border-radius: 50%;
                 overflow: hidden;

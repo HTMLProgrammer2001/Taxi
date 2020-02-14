@@ -1,7 +1,7 @@
-import RegError from './Error';
+import RegError from '../Error';
 import firebaseProj from 'js/fareConfig';
 import {toast} from 'react-toastify';
-import FormInput from './FormInput';
+import FormInput from '../FormInput';
 
 import {
     Card, CardBody, CardTitle, Form, Button

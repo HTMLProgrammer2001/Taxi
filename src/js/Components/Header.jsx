@@ -9,7 +9,7 @@ function Header() {
     }
 
     return (
-        <div className="d-flex justify-content-between mb-3 p-2 align-items-center">
+        <div className="d-flex justify-content-between p-2 align-items-center bg-white">
             <div className = "logo">
                 <img src = {require('assets/logo.jpg')} alt="Logo" className="ml-3 logo-image"/>
             </div>

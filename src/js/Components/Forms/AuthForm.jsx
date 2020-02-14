@@ -1,12 +1,9 @@
-import AuthError from './Error';
+import AuthError from '../Error';
 import firebaseProj from 'js/fareConfig';
-import {toast} from 'react-toastify';
+import FormInput from '../FormInput';
 
-import {
-    Card, CardBody,
-    CardTitle, Form, FormGroup, Input, FormFeedback,
-    Button
-} from 'reactstrap';
+import {toast} from 'react-toastify';
+import {Card, CardBody, CardTitle, Form, Button} from 'reactstrap';
 
 class AuthForm extends React.Component{
     constructor(props){
@@ -33,33 +30,21 @@ class AuthForm extends React.Component{
                             error = {this.state.authorizedError}
                             successRedirect = '/dashboard'>.</AuthError>
 
-                        <FormGroup>
-                            <Input
-                                placeholder = "Введите email"
-                                name = "userEmail"
-                                type="email"
-                                value = {this.state.fieldsValue.userEmail || ''}
-                                onChange = {this.onFieldChange}
-                                invalid = {!!this.state.fieldsError.userEmail}
-                                valid = {!this.state.fieldsError.userEmail && this.state.fieldsValue.userEmail}
-                            />
-                            <FormFeedback invalid>{this.state.fieldsError.userEmail}</FormFeedback>
-                            <FormFeedback valid>OK!</FormFeedback>
-                        </FormGroup>
+                        <FormInput
+                            onChange = {this.onFieldChange}
+                            placeholder = "Введите email"
+                            name = "userEmail"
+                            type = "email"
+                            state = {this.state}
+                        />
 
-                        <FormGroup>
-                            <Input
-                                placeholder = "Введите пароль"
-                                name = "userPassword"
-                                type="password"
-                                value = {this.state.fieldsValue.userPassword || ''}
-                                onChange = {this.onFieldChange}
-                                invalid = {!!this.state.fieldsError.userPassword}
-                                valid = {!this.state.fieldsError.userPassword && this.state.fieldsValue.userPassword}
-                            />
-                            <FormFeedback invalid>{this.state.fieldsError.userPassword}</FormFeedback>
-                            <FormFeedback valid>OK!</FormFeedback>
-                        </FormGroup>
+                        <FormInput
+                            onChange = {this.onFieldChange}
+                            placeholder = "Введите пароль"
+                            name = "userPassword"
+                            type = "password"
+                            state = {this.state}
+                        />
 
                         <Button outline color = "primary">Войти</Button>
                     </Form>

@@ -12,6 +12,7 @@ import {createStore, applyMiddleware} from 'redux';
 import {Provider} from 'react-redux';
 import thunk from 'redux-thunk';
 import {composeWithDevTools} from 'redux-devtools-extension';
+import {ToastContainer, toast} from "react-toastify";
 
 //myComponents
 const Forms = React.lazy( () => import('./Components/Forms/') );
@@ -40,6 +41,8 @@ ReactDOM.render(
                 <Route path = "/t" component = {Elem}/>
             </React.Suspense>
         </Router>
+
+        <ToastContainer position={toast.POSITION.BOTTOM_RIGHT}/>
     </Provider>,
     document.querySelector('#main')
 );

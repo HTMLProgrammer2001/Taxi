@@ -1,5 +1,8 @@
-import {showDangerMessage, showSuccessMessage} from "../../messages";
 import firebaseProj from 'js/fareConfig';
+import FormInput from '../FormInput';
+
+import {toast} from 'react-toastify';
+import {Card, CardBody, CardTitle, Form, Button} from 'reactstrap';
 
 class OrderForm extends React.Component{
     constructor(props){
@@ -29,61 +32,48 @@ class OrderForm extends React.Component{
             );
 
         return (
-            <form onSubmit={this.addOrder} className="align-items-center d-flex flex-column">
-                {this.state.savingError ?
-                    <div className="alert alert-danger">
-                        {this.state.savingError}
-                    </div>
-                        :
-                    null
-                }
+            <Card className="border-0">
+                <CardBody>
+                    <CardTitle>Добавить заказ</CardTitle>
 
-                <h4 className="text-center">Добавить заказ</h4>
+                    <Form onSubmit = {this.addOrder}>
+                        {this.state.savingError ?
+                            <div className="alert alert-danger">
+                                {this.state.savingError}
+                            </div>
+                            :
+                            null
+                        }
 
-                <input
-                    type="text"
-                    name = "orderStart"
-                    onChange = {this.onFormChange}
-                    value ={this.state.fieldsValue.orderStart || ''}
-                    className = "form-control"
-                    placeholder = "Введите начальный адресс"/>
+                        <FormInput
+                            onChange = {this.onFormChange}
+                            placeholder = "Введите начальный адресс"
+                            name = "orderStart"
+                            type = "text"
+                            state = {this.state}
+                        />
 
-                <label className="text-danger text-small">
-                    {this.state.fieldsError.orderStart}
-                </label>
+                        <FormInput
+                            onChange = {this.onFormChange}
+                            placeholder = "Введите конечный адресс"
+                            name = "orderDestination"
+                            type = "text"
+                            state = {this.state}
+                        />
 
-                <input
-                    type="text"
-                    name = "orderDestination"
-                    onChange = {this.onFormChange}
-                    value = {this.state.fieldsValue.orderDestination || ''}
-                    className = "form-control"
-                    placeholder = "Введите конечный адресс"/>
+                        <FormInput
+                            onChange = {this.onFormChange}
+                            placeholder = "Введите телефон"
+                            name = "orderPhone"
+                            type = "text"
+                            state = {this.state}
+                        />
 
-                <label className="text-danger text-small">
-                    {this.state.fieldsError.orderDestination}
-                </label>
-
-                <input
-                    type="text"
-                    name = "orderPhone"
-                    onChange = {this.onFormChange}
-                    value = {this.state.fieldsValue.orderPhone || ''}
-                    className = "form-control"
-                    placeholder = "Введите номер телефона"/>
-
-                <label className = "text-danger text-small">
-                    {this.state.fieldsError.orderPhone}
-                </label>
-
-                <button
-                    type = "submit"
-                    name = "create"
-                    className = "btn btn-primary mt-3 w-50">
-                    Создать
-                </button>
-            </form>
-        )
+                        <Button outline color = "primary">Войти</Button>
+                    </Form>
+                </CardBody>
+            </Card>
+        );
     }
 
     onFormChange(event){
@@ -96,6 +86,12 @@ class OrderForm extends React.Component{
                     [tar.name]: tar.value
                }
             }));
+
+        this.setState((state) => {
+            return {
+                fieldsError: this.testForm(state.fieldsValue)
+            }
+        })
     }
 
     async addOrder(event){
@@ -108,7 +104,7 @@ class OrderForm extends React.Component{
         });
 
         if(Object.keys(errors).length){
-            showDangerMessage('Ошибка заполнения формы заказа');
+            toast('Ошибка заполнения формы заказа', {type: toast.TYPE.ERROR});
 
             return;
         }
@@ -132,7 +128,7 @@ class OrderForm extends React.Component{
             .then( () => {
                 this.props.onCreate({orderID: newOrder.key, ...orderObj});
 
-                showSuccessMessage('Заказ добавлен');
+                toast('Заказ добавлен', {type: toast.TYPE.SUCCESS});
 
                 this.setState({
                     fieldsError: {},
@@ -144,7 +140,7 @@ class OrderForm extends React.Component{
                     savingError: null
                 });
             }, (err) => {
-                showDangerMessage('Ошибка сохранения формы');
+                toast('Ошибка сохранения формы', {type: toast.TYPE.ERROR});
 
                 this.setState({
                    savingError: err.message
@@ -153,16 +149,17 @@ class OrderForm extends React.Component{
 
     }
 
-    testForm(){
-        let errors = {};
+    testForm(testState){
+        let errors = {},
+            state = testState || this.state.fieldsValue;
 
-        if(!(new RegExp('\\+\\d{10}').test(this.state.fieldsValue.orderPhone)))
+        if(!(new RegExp('\\+\\d{10}').test(state.orderPhone)))
             errors.orderPhone = 'Введите корректный телефон(like +380501122333)';
 
-        if(!this.state.fieldsValue.orderStart)
+        if(!state.orderStart)
             errors.userName = 'Введите начальный адресс';
 
-        if(!this.state.fieldsValue.orderDestination)
+        if(!state.orderDestination)
             errors.userName = 'Введите конечный адресс';
 
         return errors;
