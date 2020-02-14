@@ -24,6 +24,8 @@ import Animation from './Components/Load/';
 
 import reducer from './Reducers/';
 
+import Elem from './Components/UI/';
+
 let store = createStore(reducer, composeWithDevTools(applyMiddleware(thunk)));
 
 ReactDOM.render(
@@ -35,6 +37,7 @@ ReactDOM.render(
                 <Route path = "/dashboard" component = {Dashboard}/>
                 <Route path = "/history" component = {History}/>
                 <Route path = "/update" component = {ProfileUpdate}/>
+                <Route path = "/t" component = {Elem}/>
             </React.Suspense>
         </Router>
     </Provider>,

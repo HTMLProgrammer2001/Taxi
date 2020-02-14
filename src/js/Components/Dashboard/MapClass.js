@@ -523,11 +523,10 @@ class MapController{
         for(let key in data.orders)
             await this.createOrder({orderID: key, ...data.orders[key]});
 
-        data.auto.forEach( (auto, autoID) => {
-            if(auto)
-                this.createAuto({autoID, ...auto});
-        });
+        for(let key in data.auto)
+            this.createAuto({autoID: key, ...data.auto[key]});
     }
+
 
     orderMarkerListener(orderInfo){
         if (!this.selectedAuto) {
