@@ -50,16 +50,23 @@ function Header() {
                     </DropdownToggle>
 
                     <DropdownMenu right>
-                        <Link to = '/profile'>
-                            <DropdownItem>Профиль</DropdownItem>
+                        <Link
+                            to = "/profile"
+                            className="user-link">
+                                <DropdownItem className="user-menu-item">Профиль</DropdownItem>
                         </Link>
 
-                        <Link to = '/update'>
-                            <DropdownItem>Обновить профиль</DropdownItem>
+                        <Link
+                            to = "/update"
+                            className="user-link">
+                                <DropdownItem className="user-menu-item">Обновить профиль</DropdownItem>
                         </Link>
 
-                        <Link to = '/' onClick={logout}>
-                            <DropdownItem>Выйти</DropdownItem>
+                        <Link
+                            to = "/"
+                            onClick={logout}
+                            className="user-link">
+                                <DropdownItem className="user-menu-item">Выйти</DropdownItem>
                         </Link>
                     </DropdownMenu>
                 </Dropdown>

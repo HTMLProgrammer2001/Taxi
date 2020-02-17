@@ -66,19 +66,25 @@ class HistoryList extends React.Component{
             return <div>Записей по данному фильтру не найдено.</div>;
 
         return (
-            <div>
-                <div className = "row d-flex">
-                    <div className = "btn btn-primary m-3" onClick={() => this.fetchDate('Excel')}>Excel</div>
+            <div className="mt-sm-3">
+                <div className = "d-flex justify-content-center flex-md-row flex-sm-row bg-secondary align-items-center bg-white card">
+                    <div className="text">Экспорт: </div>
 
-                    <div className = "btn btn-primary m-3" onClick={() => this.fetchDate('PDF')}>PDF</div>
+                    <div
+                        className = "btn btn-outline-primary m-3 px-5"
+                        onClick={() => this.fetchDate('Excel')}>Excel</div>
+
+                    <div
+                        className = "btn btn-outline-primary m-3 px-5"
+                        onClick={() => this.fetchDate('PDF')}>PDF</div>
                 </div>
 
-                {
-                    this.props.historyOrders.val.map(
-                        (order) =>
-                            <HistoryItem order = {order} key = {order.orderID}/>
-                    )
-                }
+                    {
+                        this.props.historyOrders.val.map(
+                            (order) =>
+                                <HistoryItem order = {order} key = {order.orderID}/>
+                        )
+                    }
             </div>
         );
     }

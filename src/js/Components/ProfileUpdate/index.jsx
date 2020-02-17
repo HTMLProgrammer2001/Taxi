@@ -18,7 +18,7 @@ class ProfileUpdate extends React.Component{
     render(){
         return (
             <div className="container d-flex justify-content-center mt-3">
-                <Card className="col-sm-6">
+                <Card className="col-md-6">
                     <CardBody>
                         <CardTitle>Обновить аватар</CardTitle>
                         <hr/>

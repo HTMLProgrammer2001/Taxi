@@ -27,7 +27,7 @@ class UserAva extends React.Component{
 
     render(){
         return(
-            <div className="overflow-hidden col-sm-3 col-offset-2">
+            <div className="overflow-hidden col-md-3 col-sm-6 col-offset-2">
                 <img
                     src={firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')}
                     className="w-100 mb-3"

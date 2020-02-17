@@ -19,10 +19,10 @@ class Profile extends React.Component{
 
     render(){
         return(
-            <div className="container my-3 row justify-content-center">
+            <div className="container col-sm-12 my-3 row justify-content-center">
                 <UserAva onAvaChange = {this.onProfileChange}/>
 
-                <div className="col-sm-9 mt-sm-3">
+                <div className="col-md-9 col-sm-6 mt-sm-3">
                     <UserInfo/>
 
                     <Button color="primary" className="mt-3">
