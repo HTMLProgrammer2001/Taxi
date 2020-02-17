@@ -1,12 +1,11 @@
 import UpdateError from "../Error";
 import firebaseProj from 'js/fareConfig';
-import CropForm from "../Crop/CropForm";
 
 import 'firebase/storage';
 import 'firebase/auth';
 import {toast} from 'react-toastify';
 
-import {Button, Card, CardBody, CardTitle, Form} from "reactstrap";
+import {Button, Form} from "reactstrap";
 import FormInput from "../FormInput";
 
 require("babel-polyfill");
@@ -18,7 +17,6 @@ class ProfileForm extends React.Component{
         //bind Events
         this.onFormChange = this.onFormChange.bind(this);
         this.updateUser = this.updateUser.bind(this);
-        this.onChange = this.onChange.bind(this);
 
         this.state = {
             fieldsValue: {},
@@ -29,45 +27,38 @@ class ProfileForm extends React.Component{
 
     render(){
         return (
-            <Card>
-                <CardBody>
-                    <CardTitle>Обновить профиль</CardTitle>
+            <div>
+                <Form onSubmit = {this.updateUser}>
+                    <UpdateError error = {this.state.authorizedError}>.</UpdateError>
 
-                    <Form onSubmit = {this.updateUser}>
-                        <UpdateError error = {this.state.authorizedError}>.</UpdateError>
+                    <FormInput
+                        onChange = {this.onFormChange}
+                        placeholder = "Введите новое имя"
+                        name = "userName"
+                        type = "text"
+                        className = "mt-3"
+                        state = {this.state}
+                    />
 
-                        <CropForm
-                            onChange = {this.onChange}/>
+                    <FormInput
+                       onChange = {this.onFormChange}
+                       placeholder = "Введите новый пароль"
+                       name = "userPassword"
+                       type = "password"
+                       state = {this.state}
+                    />
 
-                        <FormInput
-                            onChange = {this.onFormChange}
-                            placeholder = "Введите новое имя"
-                            name = "userName"
-                            type = "text"
-                            className = "mt-3"
-                            state = {this.state}
-                        />
+                    <FormInput
+                        onChange = {this.onFormChange}
+                        placeholder = "Повторите пароль"
+                        name = "confirmPassword"
+                        type = "password"
+                        state = {this.state}
+                    />
 
-                        <FormInput
-                            onChange = {this.onFormChange}
-                            placeholder = "Введите новый пароль"
-                            name = "userPassword"
-                            type = "password"
-                            state = {this.state}
-                        />
-
-                        <FormInput
-                            onChange = {this.onFormChange}
-                            placeholder = "Повторите пароль"
-                            name = "confirmPassword"
-                            type = "password"
-                            state = {this.state}
-                        />
-
-                        <Button outline color = "primary">Обновить</Button>
-                    </Form>
-                </CardBody>
-            </Card>
+                    <Button outline color = "primary">Обновить</Button>
+                </Form>
+            </div>
         );
     }
 
@@ -90,26 +81,6 @@ class ProfileForm extends React.Component{
                 [tar.name]: this.testForm(tar.name, tar.value)[tar.name]
             }
         })
-    }
-
-    async onChange(blob){
-        let ref = firebaseProj.storage().ref('/' + firebaseProj.auth().currentUser.uid + '.jpg');
-
-        await ref.put(blob);
-        let photo = await ref.getDownloadURL();
-
-        firebaseProj.auth().currentUser.updateProfile({
-            photoURL: photo
-        }).then(
-            () => {
-                this.setState({
-                    file: false,
-                    loaded: false
-                });
-
-                toast('Аватар изменен', {type: toast.TYPE.SUCCESS});
-            }
-        );
     }
 
     async updateUser(event){
