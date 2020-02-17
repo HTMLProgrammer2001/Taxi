@@ -2,8 +2,9 @@
 import MapController from './MapClass';
 import OrderForm from './OrderForm';
 import Layout from 'js/Layout';
-import {showDangerMessage} from "../../messages";
+import {toast} from 'react-toastify';
 import firebaseProj from 'js/fareConfig';
+import { Modal, ModalHeader, ModalBody} from 'reactstrap';
 
 require('bootstrap');
 
@@ -17,6 +18,19 @@ class Dashboard extends React.Component{
         this.mapElem = null;
 
         this.onOrderCreate = this.onOrderCreate.bind(this);
+        this.toggle = this.toggle.bind(this);
+
+        this.state = {
+            modal: false
+        }
+    }
+
+    toggle(){
+        this.setState((prev) => {
+           return {
+               modal: !prev.modal
+           }
+        });
     }
 
     componentDidMount(){
@@ -32,7 +46,7 @@ class Dashboard extends React.Component{
         dbRef.once('value').then( (res) => {
             //push to map
             this.mapControll.loadData(res.val())
-                .catch((e) => showDangerMessage(e.message));
+                .catch((e) => toast(e.message, {type: toast.TYPE.ERROR}));
         } );
 
     }
@@ -47,23 +61,16 @@ class Dashboard extends React.Component{
                 >.</div>
 
                 <div>
-                    <div className="p-3 addOrderPopupBut bg-happy-fisher" data-toggle = "modal" data-target = "#addOrder">
+                    <div className="p-3 addOrderPopupBut bg-primary" onClick={this.toggle}>
                         <span>+</span>
                     </div>
 
-                    <div className="modal" role = "dialog" id="addOrder">
-                        <div className="modal-dialog" role = "document">
-                            <div className="modal-content">
-                                <div className="modal-body">
-                                    <div className="d-flex justify-content-end">
-                                        <span className="mr-2 cur-pointer" data-dismiss="modal">&times;</span>
-                                    </div>
-
-                                    <OrderForm onCreate = {this.onOrderCreate}/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <Modal isOpen={this.state.modal} toggle={this.toggle} backdrop={true}>
+                        <ModalHeader toggle={this.toggle}></ModalHeader>
+                        <ModalBody>
+                            <OrderForm onCreate = {this.onOrderCreate}/>
+                        </ModalBody>
+                    </Modal>
                 </div>
             </React.Fragment>
         );
@@ -71,7 +78,7 @@ class Dashboard extends React.Component{
 
     onOrderCreate(order){
         this.mapControll.createOrder(order)
-            .catch((e) => showDangerMessage(e.message));
+            .catch((e) => toast(e.message, {type: toast.TYPE.ERROR}));
     }
 }
 

@@ -1,10 +1,12 @@
 import firebaseProj from 'js/fareConfig';
 
+import {Table} from 'reactstrap';
+
 function UserInfo(){
     let user = firebaseProj.auth().currentUser;
 
     return (
-        <table className="table table-bordered">
+        <Table hover bordered className = "mb-0 bg-white">
             <tbody>
             <tr>
                 <td>Имя</td>
@@ -32,7 +34,7 @@ function UserInfo(){
                 }
             </tr>
             </tbody>
-        </table>
+        </Table>
     );
 }
 

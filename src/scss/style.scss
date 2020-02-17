@@ -129,192 +129,103 @@ body{
 	}
 }
 
-.menu{
-    display: flex;
-    align-items: center;
-
-    &-account{
-        @extend %flex;
-
-        position: relative;
-
-        height: 100%;
-
-        cursor: pointer;
-
-        &::after{
-            display: none;
-        }
-
-        &-photo{
-            position: relative;
-            max-height: 100%;
-            max-width: 100%;
-
-            &-wrapper{
-                @extend %flex;
-
-                width: 50px;
-                height: 50px;
-                padding: 0;
-
-                border-radius: 50%;
-                overflow: hidden;
-            }
-        }
-
-        &-info{
-            color: #777;
-
-            &-name{
-                color: deepskyblue;
-
-                user-select: none;
-            }
-        }
-
-        &-item{
-            display: block;
-            padding: .5rem 0;
-
-            text-align: center;
-            cursor: pointer;
-
-            border-bottom: 1px solid #ccc;
-        }
-
-        &-content{
-            padding: 0;
-            min-width: 9rem;
-        }
-    }
-}
-
 #cropField{
     max-width: 100%;
     max-height: 100%;
 }
 
-/* Burger */
+/* Menu */
+%burger-row{
+    content: '';
 
-.burger {
-    width: 20vw;
-    height: 20vw;
+    position: relative;
 
-    max-height: 100px;
-    max-width: 100px;
+    width: 100%;
+    height: 2px;
+    background: #000;
 
-    min-height: 50px;
-    min-width: 50px;
+    transition: .3s;
+}
 
-    background: transparentize(#fff, .3);
-
-    display: none;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
+.burger{
+    @extend %flex;
+    flex-direction: column;
 
     cursor: pointer;
+
+    width: 50px;
+
+    position: relative;
+
+    &-item{
+        @extend %burger-row;
+    }
+
+    &::before{
+        @extend %burger-row;
+
+        top: -8px;
+    }
+
+    &::after{
+        @extend %burger-row;
+
+        top: 8px;
+    }
+
+    &.active{
+       .burger-item{
+           transform: rotate(-45deg);
+       }
+
+       &::before{
+           top: 0;
+           transform: rotate(45deg);
+       }
+
+        &::after{
+            opacity: 0;
+        }
+    }
+}
+
+.burger.active + .menu{
+    width: auto;
+}
+
+.menu{
+    background: #fff;
+    position: absolute;
+    left: 0;
+    top: calc(50px + 2rem);
+    width: 0;
+    overflow: hidden;
+    transition: .3s;
     z-index: 999;
+    box-sizing: border-box;
+    text-align: center;
 
-    position: fixed;
-    top: 0;
-    right: 0;
-
-    span {
-        width: 75%;
-        height: 2px;
-
-        display: block;
-        position: absolute;
-
-        background: #000;
-
-        transition: .3s;
-
-        &::before, &::after {
-            padding: 0;
-            margin: 0;
-
-            content: '';
-
-            display: block;
-            position: absolute;
-            left: 0;
-
-            height: 2px;
-            width: 100%;
-
-            background: #000;
-
-            transition: .3s;
-        }
-
-        &::before {
-            top: -8px;
-        }
-
-        &::after {
-            top: 8px;
-        }
-    }
-
-    &.active {
-        span {
-            transform: rotate(45deg);
-
-            &::before {
-                opacity: 0;
-            }
-
-            &::after {
-                transform: rotate(-90deg);
-                top: 0;
-            }
-        }
-
-        & + .menu {
-            height: auto;
-            overflow: visible;
-        }
+    &-item{
+        padding: 0 2rem;
+        margin-bottom: .5rem;
     }
 }
 
-@media all and (max-width: 650px){
-    .mt-sm-3{
-        margin-top: 3rem;
-    }
+.user-ava{
+    @extend %flex;
 
-    .menu{
-        background: #fff;
-        top: 100px;
-        flex-direction: column;
-        display: flex;
-        position: fixed;
-        right: 0;
-        z-index: 999;
+    border-radius: 50%;
+    overflow: hidden;
 
-        height: 0;
-        overflow: hidden;
-
-        &>*{
-            padding: .5rem 0;
-        }
-    }
-
-    .burger{
-        display: flex;
-    }
+    width: 50px;
+    height: 50px;
 }
 
-@media (max-width: 500px), (max-height: 500px){
-    .menu{
-        top: 20vw;
-    }
+.user-image{
+    max-width: 50px;
+    max-height: 50px;
 }
 
-@media (max-width: 250px), (max-height: 250px){
-    .menu{
-        top: 50px;
-    }
+.drop{
+    @extend %flex;
 }

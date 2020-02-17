@@ -1,5 +1,5 @@
 import CropAnimation from './CropAnimation';
-import {showDangerMessage, showSuccessMessage} from "js/messages";
+import {toast} from 'react-toastify';
 
 class CropForm extends React.Component{
     constructor(props){
@@ -75,7 +75,7 @@ class CropForm extends React.Component{
 
         //check file on errors
         if(!file.type.includes('image')){
-            showDangerMessage('Файл должен быть фотографией');
+            toast('Файл должен быть фотографией', {type: toast.TYPE.ERROR});
 
             this.setState({
                 file: false
@@ -85,7 +85,7 @@ class CropForm extends React.Component{
         }
 
         if(file.size > 5*1024*1024){
-            showDangerMessage('Файл превышает максимальный размер');
+            toast('Превышен размер фото(5Мб)', {type: toast.TYPE.ERROR});
 
             this.setState({
                 file: false

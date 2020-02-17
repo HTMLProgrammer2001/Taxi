@@ -1,60 +1,73 @@
-import {NavLink} from 'react-router-dom';
+import {NavLink, Link} from 'react-router-dom';
 
-import {showDangerMessage} from "../messages";
+import {toast} from 'react-toastify';
 import firebaseProj from 'js/fareConfig';
 
 function Header() {
     function logout() {
-        firebaseProj.auth().signOut().catch((e) => showDangerMessage(e.message));
+        firebaseProj.auth().signOut().catch((e) => toast(e.message, {type: toast.TYPE.ERROR}));
     }
 
     return (
-        <div className="d-flex justify-content-between p-2 align-items-center bg-white">
-            <div className = "logo">
-                <img src = {require('assets/logo.jpg')} alt="Logo" className="ml-3 logo-image"/>
-            </div>
-
+        <div className="d-flex p-3 justify-content-between bg-white">
             <div className="burger" onClick={
                 (e) => e.target.classList.toggle('active')
             }>
-                <span className="burger-item"></span>
+                <div className="burger-item"></div>
             </div>
 
             <div className="menu">
-                <NavLink activeClassName="active" className="mr-3" to = "/profile">Профиль</NavLink>
-                <NavLink activeClassName="active" className="mr-3" to = "/history">История</NavLink>
-                <NavLink activeClassName="active" to = "/dashboard" className="mr-3">Доска объявлений</NavLink>
+                <div className="menu-item">
+                    <NavLink to = '/profile'>
+                        Профиль
+                    </NavLink>
+                </div>
 
-                <div className="dropdown dropdown-menu-md-right">
-                    <div
-                        className = "menu-account dropdown-toggle"
-                        data-toggle = "dropdown">
-                            <div className="menu-account-photo-wrapper">
-                                <img
-                                    src = {
-                                        firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')
-                                    }
-                                    className="menu-account-photo"/>
-                            </div>
+                <div className="menu-item">
+                    <NavLink to = '/history'>
+                        История
+                    </NavLink>
+                </div>
 
-                            <div className="menu-account-info">
-                                <span className="menu-account-info-name">{firebaseProj.auth().currentUser.displayName}</span>
-                            </div>
+                <div className="menu-item">
+                    <NavLink to = '/dashboard'>
+                        Доска объявлений
+                    </NavLink>
+                </div>
+            </div>
+
+            <img src={require('assets/logo.jpg')} height="50px" alt=""/>
+
+            <div className="user">
+                <div className="dropdown">
+                    <div className="dropdown-toggle drop" data-toggle="dropdown">
+                        <div className="user-ava">
+                            <img
+                                src={firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')}
+                                className="user-image"
+                                alt=""/>
+                        </div>
+
+                        <div className="dropdown-menu dropdown-menu-right">
+                            <Link to='/profile'>
+                                <div className="dropdown-item">
+                                    Профиль
+                                </div>
+                            </Link>
+
+                            <Link to='/update'>
+                                <div className="dropdown-item">
+                                    Настройки аккаунта
+                                </div>
+                            </Link>
+
+                            <Link to='/' onClick = {logout}>
+                                <div className="dropdown-item">
+                                    Выйти
+                                </div>
+                            </Link>
+                        </div>
                     </div>
-
-                    <ul className="dropdown-menu menu-account-content">
-                        <li className="dropdown-menu-item menu-account-item">
-                            <NavLink to = '/profile'>Профиль</NavLink>
-                        </li>
-
-                        <li className="dropdown-menu-item menu-account-item">
-                            <NavLink to = '/update'>Обновить аккаунт</NavLink>
-                        </li>
-
-                        <li className="dropdown-menu-item menu-account-item">
-                            <NavLink to = '/' onClick={logout}>Выйти</NavLink>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>

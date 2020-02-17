@@ -1,6 +1,7 @@
 import 'firebase/storage';
 import 'firebase/auth';
 import {Link} from 'react-router-dom';
+import {Button} from 'reactstrap';
 
 import Layout from 'js/Layout';
 
@@ -18,13 +19,15 @@ class Profile extends React.Component{
 
     render(){
         return(
-            <div className="container my-5 row justify-content-center">
+            <div className="container m-5 row justify-content-center">
                 <UserAva onAvaChange = {this.onProfileChange}/>
 
-                <div className="col-sm-9 col-md-6 mt-sm-3">
+                <div className="col-sm-9 mt-sm-3">
                     <UserInfo/>
 
-                    <Link to="/update" className="btn btn-link">Обновить профиль</Link>
+                    <Button color="primary" className="mt-3">
+                        <Link to="/update" className="text-white text-decoration-none">Обновить профиль</Link>
+                    </Button>
                 </div>
             </div>
         );

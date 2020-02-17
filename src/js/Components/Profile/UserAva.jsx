@@ -1,8 +1,9 @@
 import CropForm from "../Crop/CropForm";
+import {toast} from 'react-toastify';
+import { Button, Modal, ModalHeader, ModalBody} from 'reactstrap';
 
 require('babel-polyfill');
 
-import {showDangerMessage, showSuccessMessage} from "../../messages";
 import firebaseProj from 'js/fareConfig';
 
 class UserAva extends React.Component{
@@ -11,6 +12,17 @@ class UserAva extends React.Component{
 
         this.onChange = this.onChange.bind(this);
         this.onDeleteButClick = this.onDeleteButClick.bind(this);
+        this.toggle = this.toggle.bind(this);
+
+        this.state = {modal: false}
+    }
+
+    toggle(){
+        this.setState((prev) => {
+            return {
+                modal: !prev.modal
+            };
+        });
     }
 
     render(){
@@ -21,36 +33,29 @@ class UserAva extends React.Component{
                     className="w-100 mb-3"
                     alt=""/>
 
-                <div
-                    className="btn-primary btn btn-block"
-                    data-toggle = "modal"
-                    data-target = "#changeAva">
-                    {'Обновить фото'}
-                </div>
+                <Button color="primary" className="btn-block mb-1" onClick={this.toggle}>
+                    Обновить фото
+                </Button>
 
-                <div className="modal" role="dialog" id="changeAva">
-                    <div className="modal-dialog" role="document">
-                        <div className="modal-content">
-                            <div className="modal-header d-flex justify-content-end">
-                                <span data-dismiss = 'modal' className="cursor">&times;</span>
-                            </div>
+                <Modal isOpen={this.state.modal} toggle={this.toggle} backdrop={true}>
+                    <ModalHeader toggle={this.toggle}></ModalHeader>
+                    <ModalBody>
+                        <CropForm
+                            onChange = {this.onChange}
+                            defaultContent = {
+                                <img style = {{maxWidth: '100%'}} className="mt-1" src = {firebaseProj.auth().currentUser.photoURL}/>
+                            }
+                        />
+                    </ModalBody>
+                </Modal>
 
-                            <div className="modal-body">
-                                <CropForm
-                                    onChange = {this.onChange}
-                                    defaultContent = {
-                                        <img style = {{maxWidth: '100%'}} className="mt-1" src = {firebaseProj.auth().currentUser.photoURL}/>
-                                    }
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    className="btn btn-danger btn-block mt-1"
+                <Button
                     onClick={this.onDeleteButClick}
-                >Удалить фото</div>
+                    color="danger"
+                    className="btn-block mb-3"
+                >
+                    Удалить фото
+                </Button>
             </div>
         );
     }
@@ -62,7 +67,9 @@ class UserAva extends React.Component{
             () => {
                 this.props.onAvaChange();
 
-                showSuccessMessage('Аватар удален');
+                toast('Аватар удален', {
+                    type: toast.TYPE.SUCCESS
+                });
             }
         );
     }
@@ -84,7 +91,9 @@ class UserAva extends React.Component{
                     loaded: false
                 });
 
-                showSuccessMessage('Аватар изменен');
+                toast('Аватар изменен', {
+                    type: toast.TYPE.SUCCESS
+                });
             }
         );
     }

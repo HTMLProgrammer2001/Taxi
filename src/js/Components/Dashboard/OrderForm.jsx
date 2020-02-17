@@ -69,7 +69,7 @@ class OrderForm extends React.Component{
                             state = {this.state}
                         />
 
-                        <Button outline color = "primary">Войти</Button>
+                        <Button outline color = "primary">Добавить</Button>
                     </Form>
                 </CardBody>
             </Card>

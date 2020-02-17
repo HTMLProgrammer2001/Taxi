@@ -184,13 +184,13 @@ class ProfileForm extends React.Component{
 
         if(
             (fieldName === 'userName' || !fieldName) &&
-            (this.state.fieldsValue.userName && this.state.fieldsValue.userName < 3)
+            (!this.state.fieldsValue.userName || this.state.fieldsValue.userName.length < 3)
         )
             errors.userName = 'Минимальная длина имени 3 символа';
 
         if(
             (fieldName === 'userPassword' || !fieldName) &&
-            (this.state.fieldsValue.userPassword && this.state.fieldsValue.userPassword.length < 8)
+            (!this.state.fieldsValue.userPassword || this.state.fieldsValue.userPassword.length < 8)
         )
             errors.userPassword = 'Минимальная длина пароля 8 символов';
 

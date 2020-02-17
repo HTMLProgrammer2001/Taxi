@@ -1,6 +1,6 @@
 import * as stat from './const';
 import {COST_PER_KM, COST_BUSY_PER_KM, COST_OFFCITY_PER_KM} from './const';
-import {showDangerMessage} from "../../messages";
+import {toast} from 'react-toastify';
 import firebaseProj from 'js/fareConfig';
 
 let areas = [
@@ -373,7 +373,7 @@ class MapController{
                 if(auto.tax)
                     return;
 
-                let tax = this.selectTax(dest);
+                let tax = this.selectTax(new this.googleMaps.LatLng(dest));
 
                 auto.tax = tax;
 
@@ -589,7 +589,9 @@ class MapController{
         if(this.selectedAuto === autoInfo)
             this.selectedAuto = null;
         else if(this.selectedAuto){
-            showDangerMessage('Выберите заказ или отмените выбор заказа');
+            toast('Выберите заказ или отмените выбор заказа', {
+                type: toast.TYPE.ERROR
+            });
             return;
         }
 
@@ -633,19 +635,21 @@ class MapController{
                reject(e);
            }
         })
-            .catch( (e) => showDangerMessage(e.message) );
+            .catch( (e) => toast(e.message, {type: toast.TYPE.ERROR}));
     }
 
     //update data
     updateAutoData(autoID, data){
-        return this.dbInfo.child('auto/' + autoID).update(data).catch( (e) => showDangerMessage(e.message) );
+        return this.dbInfo.child('auto/' + autoID).update(data).catch( (e) => toast(e.message, {type: toast.TYPE.ERROR}) );
     }
 
     updateOrderData(orderID, data){
-        return this.dbInfo.child('orders/' + orderID).update(data).catch( (e) => showDangerMessage(e.message) );
+        return this.dbInfo.child('orders/' + orderID).update(data).catch( (e) => toast(e.message, {type: toast.TYPE.ERROR}) );
     }
 
     selectTax(address){
+        console.log(address);
+
         let curArea = this.areas.find( (area) => {
             return this.googleMaps.geometry.poly.containsLocation(address, area);
         } );
