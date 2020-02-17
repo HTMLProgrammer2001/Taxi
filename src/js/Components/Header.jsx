@@ -63,6 +63,10 @@ function Header() {
                         </Link>
                     </DropdownMenu>
                 </Dropdown>
+
+                <div className="user-name">
+                    {firebaseProj.auth().currentUser.displayName}
+                </div>
             </div>
         </div>
     );

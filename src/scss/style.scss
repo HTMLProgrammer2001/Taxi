@@ -226,6 +226,6 @@ body{
     max-height: 50px;
 }
 
-.drop{
+.drop, .user{
     @extend %flex;
 }
