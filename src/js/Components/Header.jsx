@@ -1,7 +1,7 @@
-import {NavLink, Link} from 'react-router-dom';
-
+import {Link, NavLink} from 'react-router-dom';
 import {toast} from 'react-toastify';
 import firebaseProj from 'js/fareConfig';
+import {UncontrolledDropdown as Dropdown, DropdownToggle, DropdownItem, DropdownMenu} from 'reactstrap';
 
 function Header() {
     function logout() {
@@ -39,36 +39,30 @@ function Header() {
             <img src={require('assets/logo.jpg')} height="50px" alt=""/>
 
             <div className="user">
-                <div className="dropdown">
-                    <div className="dropdown-toggle drop" data-toggle="dropdown">
+                <Dropdown>
+                    <DropdownToggle className="drop" caret color='link'>
                         <div className="user-ava">
                             <img
                                 src={firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')}
                                 className="user-image"
                                 alt=""/>
                         </div>
+                    </DropdownToggle>
 
-                        <div className="dropdown-menu dropdown-menu-right">
-                            <Link to='/profile'>
-                                <div className="dropdown-item">
-                                    Профиль
-                                </div>
-                            </Link>
+                    <DropdownMenu right>
+                        <Link to = '/profile'>
+                            <DropdownItem>Профиль</DropdownItem>
+                        </Link>
 
-                            <Link to='/update'>
-                                <div className="dropdown-item">
-                                    Настройки аккаунта
-                                </div>
-                            </Link>
+                        <Link to = '/update'>
+                            <DropdownItem>Обновить профиль</DropdownItem>
+                        </Link>
 
-                            <Link to='/' onClick = {logout}>
-                                <div className="dropdown-item">
-                                    Выйти
-                                </div>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
+                        <Link to = '/' onClick={logout}>
+                            <DropdownItem>Выйти</DropdownItem>
+                        </Link>
+                    </DropdownMenu>
+                </Dropdown>
             </div>
         </div>
     );
