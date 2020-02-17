@@ -6,7 +6,7 @@ function UserInfo(){
     let user = firebaseProj.auth().currentUser;
 
     return (
-        <Table hover bordered className = "mb-0 bg-white">
+        <Table bordered className = "mb-0 bg-white">
             <tbody>
             <tr>
                 <td>Имя</td>

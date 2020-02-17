@@ -19,7 +19,7 @@ class Profile extends React.Component{
 
     render(){
         return(
-            <div className="container m-5 row justify-content-center">
+            <div className="container my-3 row justify-content-center">
                 <UserAva onAvaChange = {this.onProfileChange}/>
 
                 <div className="col-sm-9 mt-sm-3">

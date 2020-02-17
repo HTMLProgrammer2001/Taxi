@@ -11,12 +11,12 @@ function Forms(){
                 <img src = {require('assets/logo.jpg')} className="logo-image"/>
             </div>
 
-            <div className="container w-75 row">
-                <Col sm="6">
+            <div className="container w-80 row">
+                <Col md="6" sm="12">
                     <Registration/>
                 </Col>
 
-                <Col sm="6">
+                <Col md="6" sm="12" className="mt-sm-3">
                     <Auth/>
                 </Col>
             </div>
