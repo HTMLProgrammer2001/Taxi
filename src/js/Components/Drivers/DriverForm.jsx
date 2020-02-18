@@ -2,8 +2,6 @@ import {connect} from 'react-redux';
 import * as creators from 'js/actionCreators';
 
 function DriverForm(props){
-    console.log(props);
-
     return (
       <form className="row d-flex justify-content-between">
           <input
