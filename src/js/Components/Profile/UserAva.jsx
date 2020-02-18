@@ -27,14 +27,14 @@ class UserAva extends React.Component{
 
     render(){
         return(
-            <div className="overflow-hidden col-md-3 col-sm-6 col-offset-2">
+            <div className="overflow-hidden col-md-3 col-sm-6 col-offset-2 position-relative">
                 <img
                     src={firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')}
-                    className="w-100 mb-3 rounded-circle"
+                    className="w-100 mb-3 rounded-circle profile-avatar"
                     alt=""/>
 
-                <Button color="primary" className="btn-block mb-1" onClick={this.toggle}>
-                    Обновить фото
+                <Button color="primary" className="btn-block profile-button" onClick={this.toggle}>
+                    &#11014;
                 </Button>
 
                 <Modal isOpen={this.state.modal} toggle={this.toggle} backdrop={true}>
@@ -55,9 +55,9 @@ class UserAva extends React.Component{
                 <Button
                     onClick={this.onDeleteButClick}
                     color="danger"
-                    className="btn-block mb-3"
+                    className="btn-block profile-button profile-button-right"
                 >
-                    Удалить фото
+                    &times;
                 </Button>
             </div>
         );
