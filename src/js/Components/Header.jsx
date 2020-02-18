@@ -34,6 +34,12 @@ function Header() {
                         Доска объявлений
                     </NavLink>
                 </div>
+
+                <div className="menu-item">
+                    <NavLink to = '/drivers'>
+                        Водители
+                    </NavLink>
+                </div>
             </div>
 
             <img src={require('assets/logo.jpg')} height="50px" alt=""/>

@@ -84,3 +84,62 @@ export function historySortDirectionChange(payload) {
         payload
     };
 }
+
+//driver filter
+export function driverSortDirectionChange(payload) {
+    return {
+        type: ACTIONS.DRIVERS_SORTDIR_CHANGE,
+        payload
+    };
+}
+
+export function driverSearchChange(payload) {
+    return {
+        type: ACTIONS.DRIVERS_FILTER_NAME_CHANGE,
+        payload
+    };
+}
+
+
+//driver filters
+export function driverLoad() {
+    return {
+        type: ACTIONS.DRIVER_LOAD_START
+    };
+}
+
+export function driverSuccess(payload) {
+    return {
+        type: ACTIONS.DRIVER_LOAD_SUCCESS,
+        payload
+    };
+}
+
+export function driverFail(error) {
+    return {
+        type: ACTIONS.DRIVER_LOAD_FAILED,
+        error
+    };
+}
+
+
+export function driverAdd(payload) {
+    return {
+        type: ACTIONS.DRIVER_ADD,
+        payload
+    };
+}
+
+export function driverChange(payload) {
+    return {
+        type: ACTIONS.DRIVER_CHANGE,
+        payload
+    };
+}
+
+export function driverRemove(payload) {
+    return {
+        type: ACTIONS.DRIVER_REMOVE,
+        payload
+    };
+}

@@ -22,6 +22,7 @@ const Profile = React.lazy( () => import('./Components/Profile/') );
 const Dashboard = React.lazy( () => import('./Components/Dashboard/') );
 const History = React.lazy( () => import('./Components/History/') );
 const ProfileUpdate = React.lazy( () => import('./Components/ProfileUpdate/') );
+const Drivers = React.lazy(() => import('./Components/Drivers/'));
 
 import Animation from './Components/Load/';
 
@@ -38,6 +39,7 @@ ReactDOM.render(
                 <Route path = "/dashboard" component = {Dashboard}/>
                 <Route path = "/history" component = {History}/>
                 <Route path = "/update" component = {ProfileUpdate}/>
+                <Route path = "/drivers" component = {Drivers}/>
             </React.Suspense>
         </Router>
         <ToastContainer position={toast.POSITION.BOTTOM_RIGHT}/>
