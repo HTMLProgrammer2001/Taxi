@@ -40,7 +40,7 @@ function Header() {
 
             <div className="user">
                 <Dropdown>
-                    <DropdownToggle className="drop" caret color='link'>
+                    <DropdownToggle className="drop d-flex" caret color='link'>
                         <div className="user-ava">
                             <img
                                 src={firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')}

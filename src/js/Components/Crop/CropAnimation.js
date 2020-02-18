@@ -6,7 +6,8 @@ let defaultOpts = {
     borderWidth: 1,
     borderColor: '#fff',
     circleRadius: 10,
-    circleBg: '#fff'
+    circleBg: '#fff',
+    minRadius: 50
 };
 
 class CropAnimation{
@@ -17,10 +18,9 @@ class CropAnimation{
         this.touch = null;
         this.opts = Object.assign(defaultOpts, opts);
         this.selected = {
-            x: 0,
-            y: 0,
-            w: 100,
-            h: 100
+            x: this.elem.offsetWidth/2,
+            y: this.elem.offsetHeight/2 || 50,
+            r: 100
         };
 
         this.close = this.close.bind(this);
@@ -48,7 +48,7 @@ class CropAnimation{
         //draw back
         this.ctx.beginPath();
         this.ctx.rect(0, 0, w, h);
-        this.ctx.rect(this.selected.x, this.selected.y, this.selected.w, this.selected.h);
+        this.ctx.arc(this.selected.x, this.selected.y, Math.abs(this.selected.r), 0, Math.PI*2);
 
         this.ctx.globalAlpha = this.opts.backAlpha;
         this.ctx.fillStyle = this.opts.backColor;
@@ -60,8 +60,8 @@ class CropAnimation{
         this.ctx.beginPath();
         this.ctx.moveTo(this.selected.x + this.selected.w, this.selected.y + this.selected.h);
         this.ctx.arc(
-            this.selected.x + this.selected.w,
-            this.selected.y + this.selected.h,
+            this.selected.x + Math.cos(Math.PI/4) * this.selected.r,
+            this.selected.y + Math.sin(Math.PI/4) * this.selected.r,
             this.opts.circleRadius, 0, Math.PI*2);
 
         this.ctx.fillStyle = this.opts.circleBg;
@@ -70,7 +70,10 @@ class CropAnimation{
         //draw border
         this.ctx.strokeStyle = this.opts.borderColor;
         this.ctx.lineWidth = this.opts.borderWidth;
-        this.ctx.strokeRect(this.selected.x, this.selected.y, this.selected.w, this.selected.h);
+        this.ctx.beginPath();
+        this.ctx.arc(this.selected.x, this.selected.y, Math.abs(this.selected.r), 0, Math.PI*2);
+        this.ctx.closePath();
+        this.ctx.stroke();
     }
 
     close(){
@@ -100,7 +103,7 @@ class CropAnimation{
             x: e.offsetX,
             y: e.offsetY,
             dot: Math.sqrt(
-                (this.selected.x + this.selected.w - e.offsetX)**2 + (this.selected.y + this.selected.h - e.offsetY)**2
+                (this.selected.x + Math.cos(Math.PI/4) * this.selected.r - e.offsetX)**2 + (this.selected.y + Math.sin(Math.PI/4) * this.selected.r - e.offsetY)**2
             ) < this.opts.circleRadius
         };
     }
@@ -111,14 +114,24 @@ class CropAnimation{
 
         if(this.touch.dot){
             //resize image
-            this.selected.w = point.offsetX - this.selected.x;
-            this.selected.h = point.offsetY - this.selected.y;
+            if(Math.abs(point.offsetX - this.touch.x) > Math.abs(point.offsetY - this.touch.y))
+                this.selected.r += point.offsetX - this.touch.x;
+            else
+                this.selected.r += point.offsetY - this.touch.y;
 
-            if(this.selected.w + this.selected.x > w)
-                this.selected.w = w - this.selected.x;
+            if(this.selected.r + this.selected.x > w)
+                this.selected.r = w - this.selected.x;
 
-            if(this.selected.h + this.selected.y > h)
-                this.selected.h = h - this.selected.y;
+            if(this.selected.r + this.selected.y > h)
+                this.selected.r = h - this.selected.y;
+
+            if(this.selected.x - this.selected.r < 0)
+                this.selected.r = this.selected.x;
+
+            if(this.selected.y - this.selected.r < 0)
+                this.selected.r = this.selected.y;
+
+            this.selected.r = this.selected.r < this.opts.minRadius ? this.opts.minRadius : this.selected.r;
         }
         else{
             //move image
@@ -130,11 +143,17 @@ class CropAnimation{
             if(this.selected.y < 0)
                 this.selected.y = 0;
 
-            if(this.selected.x + this.selected.w > w)
-                this.selected.x = w - this.selected.w;
+            if(this.selected.x + this.selected.r > w)
+                this.selected.x = w - this.selected.r;
 
-            if(this.selected.y + this.selected.h > h)
-                this.selected.y = h - this.selected.h;
+            if(this.selected.x - this.selected.r < 0)
+                this.selected.x = this.selected.r;
+
+            if(this.selected.y - this.selected.r < 0)
+                this.selected.y = this.selected.r;
+
+            if(this.selected.y + this.selected.r > h)
+                this.selected.y = h - this.selected.r;
         }
     }
 
@@ -176,10 +195,11 @@ class CropAnimation{
 
         //get img
         let canv = document.createElement('canvas'),
-            imgData = this.ctx.getImageData(this.selected.x, this.selected.y, this.selected.w, this.selected.h);
+            imgData = this.ctx.getImageData(this.selected.x - this.selected.r,
+                this.selected.y - this.selected.r,
+                this.selected.r*2, this.selected.r*2);
 
-        canv.width = this.selected.w;
-        canv.height = this.selected.h;
+        canv.width = canv.height = this.selected.r*2;
 
         canv.getContext('2d').putImageData(imgData, 0, 0);
 

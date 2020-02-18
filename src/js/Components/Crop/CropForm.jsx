@@ -101,6 +101,19 @@ class CropForm extends React.Component{
 
         this.img.src = URL.createObjectURL(file);
         this.img.onload =  () => {
+            if(this.img.width < 100 || this.img.height < 100) {
+                toast('Минимальные размеры изображения 100x100', {
+                    type: toast.TYPE.ERROR
+                });
+
+                this.setState({
+                    file: file,
+                    loaded: false
+                });
+
+                return;
+            }
+
             this.setState({
                 loaded: true
             });

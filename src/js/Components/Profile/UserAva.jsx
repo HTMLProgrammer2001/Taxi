@@ -30,7 +30,7 @@ class UserAva extends React.Component{
             <div className="overflow-hidden col-md-3 col-sm-6 col-offset-2">
                 <img
                     src={firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')}
-                    className="w-100 mb-3"
+                    className="w-100 mb-3 rounded-circle"
                     alt=""/>
 
                 <Button color="primary" className="btn-block mb-1" onClick={this.toggle}>
@@ -43,7 +43,10 @@ class UserAva extends React.Component{
                         <CropForm
                             onChange = {this.onChange}
                             defaultContent = {
-                                <img style = {{maxWidth: '100%'}} className="mt-1" src = {firebaseProj.auth().currentUser.photoURL}/>
+                                <img
+                                    style = {{maxWidth: '100%'}}
+                                    className="mt-1 rounded-circle"
+                                    src = {firebaseProj.auth().currentUser.photoURL}/>
                             }
                         />
                     </ModalBody>
