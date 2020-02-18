@@ -34,7 +34,7 @@ class UserAva extends React.Component{
                     alt=""/>
 
                 <Button color="primary" className="btn-block profile-button" onClick={this.toggle}>
-                    &#11014;
+                    ⇑
                 </Button>
 
                 <Modal isOpen={this.state.modal} toggle={this.toggle} backdrop={true}>

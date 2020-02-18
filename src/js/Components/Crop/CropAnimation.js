@@ -93,7 +93,7 @@ class CropAnimation{
             x: offsetX,
             y: offsetY,
             dot: Math.sqrt(
-                (this.selected.x + this.selected.w - offsetX)**2 + (this.selected.y + this.selected.h - offsetY)**2
+                (this.selected.x + Math.cos(Math.PI/4) * this.selected.r - offsetX)**2 + (this.selected.y + Math.sin(Math.PI/4) * this.selected.r - offsetY)**2
             ) < this.opts.circleRadius
         };
     }

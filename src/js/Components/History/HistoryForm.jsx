@@ -139,7 +139,7 @@ class HistoryForm extends React.Component{
                             <label
                                 htmlFor="sortDir"
                                 className="custom-control-label"
-                            >ASC</label>
+                            >Прямой</label>
                         </div>
 
                         <div className="custom-control custom-radio">
@@ -159,7 +159,7 @@ class HistoryForm extends React.Component{
                             <label
                                 className="custom-control-label"
                                 htmlFor="sortDir"
-                            >DESC</label>
+                            >Обратный</label>
                         </div>
                     </div>
                 </form>
