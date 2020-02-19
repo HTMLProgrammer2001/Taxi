@@ -5,8 +5,22 @@ import firebaseProj from 'js/fareConfig';
 import {connect} from 'react-redux';
 
 class HistoryList extends React.Component{
+    constructor(props){
+        super(props);
+
+        this.state = {
+            drivers: []
+        };
+    }
+
     componentDidMount(){
         this.props.loadOrders();
+
+        firebaseProj.database().ref('/auto').once('value', (snap) => {
+            this.setState({
+                drivers: snap.val()
+            });
+        });
     }
 
     static DateConvert(key, value){
@@ -62,27 +76,32 @@ class HistoryList extends React.Component{
 
     render(){
 
-        if(!this.props.historyOrders.val.length)
-            return <div>Записей по данному фильтру не найдено.</div>;
-
         return (
             <div className="mt-sm-3">
-                <div className = "d-flex justify-content-center flex-md-row flex-sm-row bg-secondary align-items-center bg-white card">
-                    <div className="text">Экспорт: </div>
+                <div className = "d-flex justify-content-between flex-md-row flex-sm-row align-items-center card px-5">
+                    <div className="card-title d-flex align-items-center m-0">Заказы</div>
 
-                    <div
-                        className = "btn btn-outline-primary m-3 px-5"
-                        onClick={() => this.fetchDate('Excel')}>Excel</div>
+                    <div>
+                        <div
+                            className = "btn btn-outline-primary m-3 px-5"
+                            onClick={() => this.fetchDate('Excel')}>Excel</div>
 
-                    <div
-                        className = "btn btn-outline-primary m-3 px-5"
-                        onClick={() => this.fetchDate('PDF')}>PDF</div>
+                        <div
+                            className = "btn btn-outline-primary m-3 px-5"
+                            onClick={() => this.fetchDate('PDF')}>PDF</div>
+                    </div>
                 </div>
 
                     {
                         this.props.historyOrders.val.map(
                             (order) =>
-                                <HistoryItem order = {order} key = {order.orderID}/>
+                                <HistoryItem order = {order} drivers = {this.state.drivers} key = {order.orderID}/>
+                        ) || (
+                            <div className="card">
+                                <div className="card-body">
+                                    Записей по данному фильтру не найдено.
+                                </div>
+                            </div>
                         )
                     }
             </div>

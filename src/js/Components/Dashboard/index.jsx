@@ -26,6 +26,13 @@ class Dashboard extends React.Component{
     }
 
     toggle(){
+        if(!firebaseProj.auth().currentUser.emailVerified){
+            toast('Только верифицированные пользователи могут создавать заказы', {
+                type: toast.TYPE.ERROR
+            });
+            return;
+        }
+
         this.setState((prev) => {
            return {
                modal: !prev.modal
@@ -35,7 +42,10 @@ class Dashboard extends React.Component{
 
     componentDidMount(){
         //init map
-        loadGoogleMapsApi({key: 'AIzaSyDdJjjkx2zXC_pIjlW7MtTgU2HvYFrqIqY'}).then((googleMaps) => {
+        loadGoogleMapsApi({
+            key: 'AIzaSyDdJjjkx2zXC_pIjlW7MtTgU2HvYFrqIqY',
+            libraries: ['places']
+        }).then((googleMaps) => {
             this.mapControll = new MapController(googleMaps);
 
             this.mapControll.createMap(this.mapElem);
@@ -66,7 +76,9 @@ class Dashboard extends React.Component{
                     </div>
 
                     <Modal isOpen={this.state.modal} toggle={this.toggle} backdrop={true}>
-                        <ModalHeader toggle={this.toggle}></ModalHeader>
+                        <ModalHeader toggle={this.toggle}>
+                            Добавить заказ
+                        </ModalHeader>
                         <ModalBody>
                             <OrderForm onCreate = {this.onOrderCreate}/>
                         </ModalBody>

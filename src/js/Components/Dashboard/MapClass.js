@@ -440,6 +440,7 @@ class MapController{
         content += `
         <div class = "justify-content-center">
             <div>Номер заказа: ${info.orderID}</div>
+            <div>Имя: ${info.userName}</div>
             <div>Телефон: ${info.phone}</div>
             <div>Пункт назначения: ${info.destination}</div>`
 

@@ -1,8 +1,10 @@
 import firebaseProj from 'js/fareConfig';
 import FormInput from '../FormInput';
 
+const loadGoogleMapsApi = require('load-google-maps-api');
+
 import {toast} from 'react-toastify';
-import {Card, CardBody, CardTitle, Form, Button} from 'reactstrap';
+import {Card, CardBody, Form, Button} from 'reactstrap';
 
 class OrderForm extends React.Component{
     constructor(props){
@@ -10,6 +12,14 @@ class OrderForm extends React.Component{
 
         this.onFormChange = this.onFormChange.bind(this);
         this.addOrder = this.addOrder.bind(this);
+
+        //google places api variables
+        this.googleMaps = null;
+        this.startField = React.createRef();
+        this.destField = React.createRef();
+
+        this.startAutocomplete = null;
+        this.destAutocomplete = null;
 
         this.state = {
             fieldsValue: {
@@ -22,7 +32,30 @@ class OrderForm extends React.Component{
         }
     }
 
+    componentDidMount(){
+
+        //load google maps api for autocomplete
+        loadGoogleMapsApi({
+            key: 'AIzaSyDdJjjkx2zXC_pIjlW7MtTgU2HvYFrqIqY',
+            libraries: ['places']
+        })
+            .then(
+                (googleMaps) => {
+                    this.googleMaps = googleMaps;
+
+                    this.startAutocomplete = new googleMaps.places.Autocomplete(this.startField.current, {
+                        componentRestrictions: {country: 'ua'}
+                    });
+
+                    this.destAutocomplete = new googleMaps.places.Autocomplete(this.destField.current, {
+                        componentRestrictions: {country: 'ua'}
+                    });
+                }
+            );
+    }
+
     render(){
+
         //account aren't verified
         if(!firebaseProj.auth().currentUser.emailVerified)
             return (
@@ -34,8 +67,6 @@ class OrderForm extends React.Component{
         return (
             <Card className="border-0">
                 <CardBody>
-                    <CardTitle>Добавить заказ</CardTitle>
-
                     <Form onSubmit = {this.addOrder}>
                         {this.state.savingError ?
                             <div className="alert alert-danger">
@@ -45,27 +76,55 @@ class OrderForm extends React.Component{
                             null
                         }
 
-                        <FormInput
-                            onChange = {this.onFormChange}
-                            placeholder = "Введите начальный адресс"
+                        <input
+                            type = "text"
                             name = "orderStart"
+                            placeholder="Откуда"
+                            onChange={this.onFormChange}
+                            ref = {this.startField}
+                            className="form-control mt-3"/>
+
+                        {
+                            this.state.fieldsError.orderStart ?
+                                <label className="text-danger text-small">
+                                    {this.state.fieldsError.orderStart}
+                                </label>
+                                    :
+                                null
+                        }
+
+                        <input
                             type = "text"
+                            name = "orderDest"
+                            placeholder="Куда"
+                            ref = {this.destField}
+                            onChange={this.onFormChange}
+                            className="form-control mt-3"/>
+
+                        {
+                            this.state.fieldsError.orderDest ?
+                                <label className="text-danger text-small">
+                                    {this.state.fieldsError.orderDest}
+                                </label>
+                                :
+                                null
+                        }
+
+                        <FormInput
+                            onChange = {this.onFormChange}
+                            placeholder = "Имя"
+                            name = "orderName"
+                            type = "text"
+                            className = "mt-3"
                             state = {this.state}
                         />
 
                         <FormInput
                             onChange = {this.onFormChange}
-                            placeholder = "Введите конечный адресс"
-                            name = "orderDestination"
-                            type = "text"
-                            state = {this.state}
-                        />
-
-                        <FormInput
-                            onChange = {this.onFormChange}
-                            placeholder = "Введите телефон"
+                            placeholder = "Телефон"
                             name = "orderPhone"
                             type = "text"
+                            className = "mt-3"
                             state = {this.state}
                         />
 
@@ -112,12 +171,13 @@ class OrderForm extends React.Component{
 
         //create order
         let orderObj = {
-            destination: this.state.fieldsValue.orderDestination,
-            start: this.state.fieldsValue.orderStart,
+            destination: this.destAutocomplete.getPlace().formatted_address,
+            start: this.startAutocomplete.getPlace().formatted_address,
             status: 'Свободен',
             orderCreate: +new Date(),
             phone: this.state.fieldsValue.orderPhone,
-            user: firebaseProj.auth().currentUser.uid
+            user: firebaseProj.auth().currentUser.uid,
+            userName: this.state.fieldsValue.orderName
         },
         newOrder = await firebaseProj
             .database()
@@ -163,16 +223,46 @@ class OrderForm extends React.Component{
             errors.orderPhone = 'Введите корректный телефон(like +380501122333)';
 
         if(
-            (fieldName === 'orderStart' || !fieldName) &&
-            !state.orderStart
+            (fieldName === 'orderName' || !fieldName) &&
+            (!state.orderName || state.orderName.length < 3)
         )
-            errors.userName = 'Введите начальный адресс';
+            errors.orderName = 'Длина имени должна быть не меньше трех символов';
 
-        if(
-            (fieldName === 'orderDestination' || !fieldName) &&
-            !state.orderDestination
-        )
-            errors.userName = 'Введите конечный адресс';
+        //valid address
+        let valid = false,
+            startPlace = this.startAutocomplete.getPlace(),
+            destPlace = this.destAutocomplete.getPlace();
+
+        if(!startPlace)
+            errors.orderStart = 'Введите начальный адресс';
+        else{
+            //if not in our region then throw error
+            for(let address_comp of startPlace.address_components)
+                if(address_comp.long_name === 'Херсонська область'){
+                    valid = true;
+                    break;
+                }
+
+            if(!valid)
+                errors.orderStart = 'Доступны заказы только в Херсонской области';
+        }
+
+        valid = false;
+
+        if(!destPlace)
+            errors.orderDest = 'Ввелите начальный адресс';
+        else{
+            //if not in our region then throw error
+            for(let address_comp of destPlace.address_components)
+                if(address_comp.long_name === 'Херсонська область'){
+                    valid = true;
+                    break;
+                }
+
+            if(!valid)
+                errors.orderDest = 'Доступны заказы только в Херсонской области';
+        }
+
 
         return errors;
     }

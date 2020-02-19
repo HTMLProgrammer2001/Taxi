@@ -1,6 +1,7 @@
 import {FormFeedback, FormGroup, Input} from "reactstrap";
 
-export default function FormInput(props){
+//пробрасываем ссылку
+export default React.forwardRef( (props, ref) => {
     let state = props.state,
         stateToProps = {};
 
@@ -14,6 +15,7 @@ export default function FormInput(props){
             <Input
                 value = {state.fieldsValue[props.name] || ''}
                 {...stateToProps}
+                ref = {ref}
                 invalid = {!!state.fieldsError[props.name]}
                 valid = {!state.fieldsError[props.name] && state.fieldsValue[props.name]}
             />
@@ -21,4 +23,4 @@ export default function FormInput(props){
             <FormFeedback valid>OK!</FormFeedback>
         </FormGroup>
     )
-}
+} );
