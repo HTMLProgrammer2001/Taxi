@@ -102,64 +102,19 @@ class HistoryForm extends React.Component{
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="sortBy">Сортировать по:</label>
-
-                        <select
-                            className="custom-select mb-3"
-                            value = {this.props.historyForm.sortBy || ''}
-                            onChange={
-                                (e) => this.props.historyFilterChange(
-                                    creators.historySortFieldChange(e.target.value)
-                                )
-                            }
-                        >
-                            <option value="orderCreate">Дате создания</option>
-                            <option value="status">Статусу</option>
-                            <option value="orderID">ID</option>
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="sortDir">Порядок сортировки:</label>
-
-                        <div className="custom-control custom-radio">
+                        <div className="custom-control custom-switch">
                             <input
-                                type="radio"
+                                type="checkbox"
                                 className="custom-control-input"
-                                name = "sortDir"
-                                value="ASC"
-                                defaultChecked={this.props.historyForm.sortDir === 'ASC'}
-                                onClick={
-                                    (e) => this.props.historyFilterChange(
-                                        creators.historySortDirectionChange(e.target.form.sortDir.value)
-                                    )
-                                }
-                                style = {{zIndex: 9999}}
-                            />
-                            <label
-                                htmlFor="sortDir"
-                                className="custom-control-label"
-                            >Прямой</label>
-                        </div>
+                                id="sortDir"
+                                onChange={
+                                    (e) =>
+                                        this.props.historyFilterChange(
+                                            creators.historySortDirectionChange(e.target.checked ? 'ASC' : 'DESC')
+                                        )
+                                }/>
 
-                        <div className="custom-control custom-radio">
-                            <input
-                                type="radio"
-                                className="custom-control-input"
-                                name = "sortDir"
-                                value = "DESC"
-                                onClick={
-                                    (e) => this.props.historyFilterChange(
-                                        creators.historySortDirectionChange(e.target.form.sortDir.value)
-                                    )
-                                }
-                                defaultChecked={this.props.historyForm.sortDir === 'DESC'}
-                                style = {{zIndex: 9999}}
-                            />
-                            <label
-                                className="custom-control-label"
-                                htmlFor="sortDir"
-                            >Обратный</label>
+                            <label htmlFor="sortDir" className="custom-control-label">Сортировка по убыванию</label>
                         </div>
                     </div>
                 </form>
