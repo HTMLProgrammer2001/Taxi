@@ -12,8 +12,8 @@ export default function FormInput(props){
     return (
         <FormGroup>
             <Input
-                {...stateToProps}
                 value = {state.fieldsValue[props.name] || ''}
+                {...stateToProps}
                 invalid = {!!state.fieldsError[props.name]}
                 valid = {!state.fieldsError[props.name] && state.fieldsValue[props.name]}
             />

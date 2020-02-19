@@ -1,8 +1,11 @@
 import ProfileForm from './ProfileForm';
 import ProfileDelete from './ProfileDelete';
 import Layout from 'js/Layout';
-import CropForm from "../Crop/CropForm";
+import CropForm from "../../Crop/CropForm";
+import firebaseProj from 'js/fareConfig';
 
+import 'firebase/auth';
+import 'firebase/storage';
 import CardTitle from "reactstrap/es/CardTitle";
 import {toast} from "react-toastify";
 import CardBody from "reactstrap/es/CardBody";
@@ -24,7 +27,14 @@ class ProfileUpdate extends React.Component{
                         <hr/>
 
                         <CropForm
-                            onChange = {this.onChange}/>
+                            onChange = {this.onChange}
+                            defaultContent = {
+                                <img
+                                    style = {{maxWidth: '100%'}}
+                                    className="mt-1 rounded-circle"
+                                    src = {firebaseProj.auth().currentUser.photoURL  || require('assets/defAvatar.png')}/>
+                            }
+                        />
 
                         <CardTitle className="mt-5">Обновить профиль</CardTitle>
                         <hr/>

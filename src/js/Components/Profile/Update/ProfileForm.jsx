@@ -1,12 +1,11 @@
-import UpdateError from "../Error";
+import UpdateError from "../../Error";
 import firebaseProj from 'js/fareConfig';
 
-import 'firebase/storage';
 import 'firebase/auth';
 import {toast} from 'react-toastify';
 
 import {Button, Form} from "reactstrap";
-import FormInput from "../FormInput";
+import FormInput from "../../FormInput";
 
 require("babel-polyfill");
 
@@ -29,7 +28,13 @@ class ProfileForm extends React.Component{
         return (
             <div>
                 <Form onSubmit = {this.updateUser}>
-                    <UpdateError error = {this.state.authorizedError}>.</UpdateError>
+                    <UpdateError error = {this.state.updateError}>.</UpdateError>
+
+                    <input
+                        className="form-control mt-3"
+                        name = "userEmail"
+                        disabled={true}
+                        value={firebaseProj.auth().currentUser.email}/>
 
                     <FormInput
                         onChange = {this.onFormChange}
@@ -38,6 +43,7 @@ class ProfileForm extends React.Component{
                         type = "text"
                         className = "mt-3"
                         state = {this.state}
+                        value = {this.state.fieldsValue.userName || firebaseProj.auth().currentUser.displayName}
                     />
 
                     <FormInput

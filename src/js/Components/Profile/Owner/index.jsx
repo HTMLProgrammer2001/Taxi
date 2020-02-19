@@ -1,7 +1,5 @@
-import 'firebase/storage';
 import 'firebase/auth';
-import {Link} from 'react-router-dom';
-import {Button} from 'reactstrap';
+import 'firebase/storage';
 
 import Layout from 'js/Layout';
 
@@ -24,10 +22,6 @@ class Profile extends React.Component{
 
                 <div className="col-md-9 col-sm-6 mt-sm-3">
                     <UserInfo/>
-
-                    <Button color="primary" className="mt-3">
-                        <Link to="/update" className="text-white text-decoration-none">Обновить профиль</Link>
-                    </Button>
                 </div>
             </div>
         );

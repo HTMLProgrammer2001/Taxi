@@ -18,10 +18,10 @@ import 'react-toastify/dist/ReactToastify.css'
 
 //myComponents
 const Forms = React.lazy( () => import('./Components/Forms/') );
-const Profile = React.lazy( () => import('./Components/Profile/') );
+const Profile = React.lazy( () => import('./Components/Profile/Owner/') );
 const Dashboard = React.lazy( () => import('./Components/Dashboard/') );
 const History = React.lazy( () => import('./Components/History/') );
-const ProfileUpdate = React.lazy( () => import('./Components/ProfileUpdate/') );
+const ProfileUpdate = React.lazy( () => import('./Components/Profile/Update/') );
 const Drivers = React.lazy(() => import('./Components/Drivers/'));
 
 import Animation from './Components/Load/';

@@ -1,6 +1,5 @@
 import firebaseProj from 'js/fareConfig';
 
-import 'firebase/storage';
 import 'firebase/auth';
 import {toast} from 'react-toastify';
 

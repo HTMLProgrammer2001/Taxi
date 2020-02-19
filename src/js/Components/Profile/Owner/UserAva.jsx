@@ -1,4 +1,4 @@
-import CropForm from "../Crop/CropForm";
+import CropForm from "../../Crop/CropForm";
 import {toast} from 'react-toastify';
 import { Button, Modal, ModalHeader, ModalBody} from 'reactstrap';
 
@@ -46,7 +46,7 @@ class UserAva extends React.Component{
                                 <img
                                     style = {{maxWidth: '100%'}}
                                     className="mt-1 rounded-circle"
-                                    src = {firebaseProj.auth().currentUser.photoURL}/>
+                                    src = {firebaseProj.auth().currentUser.photoURL || require('assets/defAvatar.png')}/>
                             }
                         />
                     </ModalBody>
@@ -89,13 +89,13 @@ class UserAva extends React.Component{
             () => {
                 this.props.onAvaChange();
 
+                toast('Аватар изменен', {
+                    type: toast.TYPE.SUCCESS
+                });
+
                 this.setState({
                     file: false,
                     loaded: false
-                });
-
-                toast('Аватар изменен', {
-                    type: toast.TYPE.SUCCESS
                 });
             }
         );
