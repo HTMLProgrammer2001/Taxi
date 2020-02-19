@@ -22,7 +22,7 @@ body{
 }
 
 #map{
-	height: 400px;
+	height: calc(100vh - 80px);
 }
 
 .logo-image{
@@ -151,11 +151,21 @@ body{
     @extend %flex;
     flex-direction: column;
 
+    position: absolute;
+    left: 1rem;
+
     cursor: pointer;
 
     width: 50px;
+    height: 100%;
 
-    position: relative;
+    &-drop{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        height: 100%;
+    }
 
     &-item{
         @extend %burger-row;
@@ -194,14 +204,18 @@ body{
 }
 
 .menu{
-    background: #fff;
+    @extend %flex;
+
     position: absolute;
     left: 0;
     top: calc(60px + 2rem);
     width: 0;
+
+    background: #fff;
     overflow: hidden;
     transition: .3s;
     z-index: 999;
+
     box-sizing: border-box;
     text-align: center;
 
@@ -256,11 +270,13 @@ body{
 
 .profile-button{
     margin: 0 !important;
+
     position: absolute;
     width: 50px;
     height: 50px;
-    border-radius: 50%;
     bottom: 15%;
+
+    border-radius: 50%;
 }
 
 .profile-button-right{

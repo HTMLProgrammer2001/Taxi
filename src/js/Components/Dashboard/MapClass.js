@@ -251,7 +251,10 @@ class MapController{
         this.map = new this.googleMaps.Map(mapElement, {
             center: { lat: 46.65, lng: 32.58 },
             zoom: 12,
-            mapTypeControl: false
+            mapTypeControl: false,
+            zoomControl: false,
+            streetViewControl: false,
+            rotateControl: false
         });
 
         this.areas = areas.map( (areaOpt) => {
