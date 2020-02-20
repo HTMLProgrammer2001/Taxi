@@ -80,15 +80,22 @@ class HistoryList extends React.Component{
                 </div>
 
                     {
+                        !this.props.historyOrders.val || !this.props.historyOrders.val.length ?
+                            (
+                                <div className="card">
+                                    <div className="card-body">
+                                        Записей по данному фильтру не найдено.
+                                    </div>
+                                </div>
+                            )
+                        :
+                            null
+                    }
+
+                    {
                         this.props.historyOrders.val.map(
                             (order) =>
                                 <HistoryItem order = {order} key = {order.orderID}/>
-                        ) || (
-                            <div className="card">
-                                <div className="card-body">
-                                    Записей по данному фильтру не найдено.
-                                </div>
-                            </div>
                         )
                     }
             </div>
@@ -107,7 +114,7 @@ let stateToProps = (state) => {
     //check date
     orders = orders.filter( (ord) => {
         return (!state.history.form.dateStart || ord.orderCreate > Date.parse(state.history.form.dateStart))
-            && (!state.history.form.dateEnd || ord.orderCreate < Date.parse(state.history.form.dateEnd));
+            && (!state.history.form.dateEnd || ord.orderCreate < Date.parse(state.history.form.dateEnd) + 24*60*60*1000);
     } );
 
     //check status

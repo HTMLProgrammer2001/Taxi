@@ -4,7 +4,6 @@ import firebaseProj from 'js/fareConfig';
 
 //date picker
 import { DateRange } from 'react-date-range';
-
 import {connect} from 'react-redux';
 
 class HistoryForm extends React.Component{
