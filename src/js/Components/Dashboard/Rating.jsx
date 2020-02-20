@@ -6,7 +6,7 @@ class Rating extends React.Component{
 
         this.state = {
             currentRating: props.rat || 0,
-            isMarked: !!props.rat
+            isMarked: props.rat !== undefined
         };
 
         this.onMove = this.onMove.bind(this);

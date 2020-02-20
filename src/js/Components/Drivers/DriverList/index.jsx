@@ -1,19 +1,20 @@
 import {connect} from 'react-redux';
 
-import DriverHOC from '../DriversHOC';
+import DriverHOC from '../../DriversHOC';
+import DriverItem from './DriverItem';
 
 class DriverList extends React.Component{
     render(){
         return (
-          <ul>
-              {
-                  this.props.drivers.map(
-                    (driver) => {
-                        return <li>{driver.name}</li>
-                    }
-                  )
-              }
-          </ul>
+            <ul className="p-0">
+                {
+                    this.props.drivers.map(
+                        (driver) => {
+                            return <DriverItem driver = {driver}/>
+                        }
+                    )
+                }
+            </ul>
         );
     }
 }
