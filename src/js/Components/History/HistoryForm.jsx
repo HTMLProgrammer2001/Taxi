@@ -101,7 +101,7 @@ class HistoryForm extends React.Component{
                             onChange={
                                 (e) =>
                                     this.props.historyFilterChange(
-                                        creators.historySortDirectionChange(!e.target.checked ? 'ASC' : 'DESC')
+                                        creators.historySortDirectionChange(e.target.checked ? 'ASC' : 'DESC')
                                     )
                             }/>
 

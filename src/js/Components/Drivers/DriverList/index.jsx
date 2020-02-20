@@ -8,6 +8,15 @@ class DriverList extends React.Component{
         return (
             <ul className="p-0">
                 {
+                    !this.props.drivers || !this.props.drivers.length ?
+                        <div className="card p-3">
+                            Ничего не найдено
+                        </div>
+                            :
+                        null
+                }
+
+                {
                     this.props.drivers.map(
                         (driver) => {
                             return <DriverItem driver = {driver}/>

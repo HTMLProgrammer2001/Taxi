@@ -18,8 +18,14 @@ function DriverItem(props) {
                     <div className="text-secondary">#{props.driver.autoID}</div>
                 </div>
 
-                <div>Имя: {props.driver.name}</div>
-                <div>Номер машини: {props.driver.nomer}</div>
+                <div className="d-flex">
+                    <img src = {props.driver.photo} width="100px" height="100px" className="mr-3"/>
+
+                    <div>
+                        <div>Имя: {props.driver.name}</div>
+                        <div>Номер машины: {props.driver.nomer}</div>
+                    </div>
+                </div>
 
                 <div className="d-flex mt-3 justify-content-end">
                     <div>
