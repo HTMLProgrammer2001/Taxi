@@ -61,7 +61,9 @@ require("babel-polyfill");
 
 class MapController{
 
-    constructor(googleMaps){
+    constructor(googleMaps, openRatingForm){
+        this.openRatingForm = openRatingForm;
+
         this.map = null;
         this.googleMaps = googleMaps;
         this.geodecoder = new googleMaps.Geocoder();
@@ -495,6 +497,9 @@ class MapController{
 
                 auto.messageWindow.close();
             });
+
+        //call rating form
+        this.openRatingForm(Object.assign(order, {autoID: auto.autoID}));
     }
 
     eventWaitHandler(auto, order){

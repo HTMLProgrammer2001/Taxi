@@ -101,7 +101,7 @@ export function driverSearchChange(payload) {
 }
 
 
-//driver filters
+//drivers
 export function driverLoad() {
     return {
         type: ACTIONS.DRIVER_LOAD_START

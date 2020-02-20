@@ -153,6 +153,7 @@ body{
 
     position: absolute;
     left: 1rem;
+    top: 0;
 
     cursor: pointer;
 
@@ -289,4 +290,10 @@ body{
 
 .pac-container.pac-logo{
     z-index: 999999;
+}
+
+.star{
+    fill: none;
+    stroke: yellow;
+    stroke-width: 10;
 }

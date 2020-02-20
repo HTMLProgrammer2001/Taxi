@@ -2,8 +2,7 @@ import * as ACTIONS from 'js/actions';
 
 let initialState = {
     val: [],
-    error: null,
-    loading: false
+    loaded: false
 },
 
     driversReducer = (state = initialState, action) =>
@@ -12,13 +11,7 @@ let initialState = {
 
         switch (action.type) {
             case ACTIONS.DRIVER_LOAD_START:
-                return {...state, loading: true};
-
-            case ACTIONS.DRIVER_LOAD_SUCCESS:
-                return {...state, val: action.payload, loading: false};
-
-            case ACTIONS.DRIVER_LOAD_FAIL:
-                return {...state, error: action.error, loading: false};
+                return {...state, loaded: true};
 
             case ACTIONS.DRIVER_CHANGE:
                 driverIndex = state.val.findIndex( (driver) => {

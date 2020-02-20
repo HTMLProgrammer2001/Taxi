@@ -2,12 +2,12 @@
 import MapController from './MapClass';
 import OrderForm from './OrderForm';
 import Layout from 'js/Layout';
-import {toast} from 'react-toastify';
 import firebaseProj from 'js/fareConfig';
+import MarkForm from './MarkForm';
+
+import {toast} from 'react-toastify';
 import { Modal, ModalHeader, ModalBody} from 'reactstrap';
-
 require('bootstrap');
-
 const loadGoogleMapsApi = require('load-google-maps-api');
 
 class Dashboard extends React.Component{
@@ -18,14 +18,17 @@ class Dashboard extends React.Component{
         this.mapElem = null;
 
         this.onOrderCreate = this.onOrderCreate.bind(this);
-        this.toggle = this.toggle.bind(this);
+        this.toggleAddOrder = this.toggleAddOrder.bind(this);
+        this.markToggle = this.markToggle.bind(this);
+        this.createMark = this.createMark.bind(this);
 
         this.state = {
-            modal: false
+            addOrderOpen: false,
+            markOrder: null
         }
     }
 
-    toggle(){
+    toggleAddOrder(){
         if(!firebaseProj.auth().currentUser.emailVerified){
             toast('Только верифицированные пользователи могут создавать заказы', {
                 type: toast.TYPE.ERROR
@@ -35,8 +38,21 @@ class Dashboard extends React.Component{
 
         this.setState((prev) => {
            return {
-               modal: !prev.modal
+               addOrderOpen: !prev.addOrderOpen
            }
+        });
+    }
+
+    createMark(order){
+        if(order)
+            this.setState({
+                markOrder: order
+            });
+    }
+
+    markToggle(){
+        this.setState({
+            markOrder: null
         });
     }
 
@@ -46,7 +62,7 @@ class Dashboard extends React.Component{
             key: 'AIzaSyDdJjjkx2zXC_pIjlW7MtTgU2HvYFrqIqY',
             libraries: ['places']
         }).then((googleMaps) => {
-            this.mapControll = new MapController(googleMaps);
+            this.mapControll = new MapController(googleMaps, this.createMark);
 
             this.mapControll.createMap(this.mapElem);
         });
@@ -71,16 +87,26 @@ class Dashboard extends React.Component{
                 >.</div>
 
                 <div>
-                    <div className="p-3 addOrderPopupBut bg-primary" onClick={this.toggle}>
+                    <div className="p-3 addOrderPopupBut bg-primary" onClick={this.toggleAddOrder}>
                         <span>+</span>
                     </div>
 
-                    <Modal isOpen={this.state.modal} toggle={this.toggle} backdrop={true}>
-                        <ModalHeader toggle={this.toggle}>
+                    <Modal isOpen={this.state.addOrderOpen} toggle={this.toggleAddOrder} backdrop={true}>
+                        <ModalHeader toggle={this.toggleAddOrder}>
                             Добавить заказ
                         </ModalHeader>
                         <ModalBody>
                             <OrderForm onCreate = {this.onOrderCreate}/>
+                        </ModalBody>
+                    </Modal>
+
+                    {/*Mark order modal*/}
+                    <Modal isOpen={!!this.state.markOrder} toggle={this.markToggle} backdrop={true}>
+                        <ModalHeader toggle={this.markToggle}>
+                            Оцените поездку
+                        </ModalHeader>
+                        <ModalBody>
+                            <MarkForm order = {this.state.markOrder} close = {this.markToggle}/>
                         </ModalBody>
                     </Modal>
                 </div>
@@ -93,5 +119,6 @@ class Dashboard extends React.Component{
             .catch((e) => toast(e.message, {type: toast.TYPE.ERROR}));
     }
 }
+
 
 export default Layout(Dashboard);

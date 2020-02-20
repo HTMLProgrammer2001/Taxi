@@ -1,6 +1,7 @@
 import HistoryItem from './HistoryItem';
 import * as creators from 'js/actionCreators';
 import firebaseProj from 'js/fareConfig';
+import DriversHOC from '../../DriversHOC';
 
 import {connect} from 'react-redux';
 
@@ -173,4 +174,4 @@ let dispatchToProps = (dispatch) => {
     };
 };
 
-export default connect(stateToProps, dispatchToProps)(HistoryList);
+export default DriversHOC(connect(stateToProps, dispatchToProps)(HistoryList));
