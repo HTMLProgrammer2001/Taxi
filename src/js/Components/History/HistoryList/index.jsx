@@ -5,22 +5,8 @@ import firebaseProj from 'js/fareConfig';
 import {connect} from 'react-redux';
 
 class HistoryList extends React.Component{
-    constructor(props){
-        super(props);
-
-        this.state = {
-            drivers: []
-        };
-    }
-
     componentDidMount(){
         this.props.loadOrders();
-
-        firebaseProj.database().ref('/auto').once('value', (snap) => {
-            this.setState({
-                drivers: snap.val()
-            });
-        });
     }
 
     static DateConvert(key, value){
@@ -95,7 +81,7 @@ class HistoryList extends React.Component{
                     {
                         this.props.historyOrders.val.map(
                             (order) =>
-                                <HistoryItem order = {order} drivers = {this.state.drivers} key = {order.orderID}/>
+                                <HistoryItem order = {order} key = {order.orderID}/>
                         ) || (
                             <div className="card">
                                 <div className="card-body">

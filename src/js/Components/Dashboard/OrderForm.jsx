@@ -191,6 +191,9 @@ class OrderForm extends React.Component{
 
                 toast('Заказ добавлен', {type: toast.TYPE.SUCCESS});
 
+                this.startField.current.value = '';
+                this.destField.current.value = '';
+
                 this.setState({
                     fieldsError: {},
                     fieldsValue: {

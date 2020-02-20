@@ -1,5 +1,7 @@
 import * as stat from 'js/Components/Dashboard/const';
 
+import {connect} from 'react-redux';
+
 let colors = {
     [stat.ORDER_FREE]: 'primary',
     [stat.ORDER_WAIT]: 'warning',
@@ -11,9 +13,9 @@ let colors = {
 
 function HistoryItem(props){
     function findDriver(id){
-        return Object.entries(props.drivers).find(
-            ([drivID, driver]) => id === drivID
-        ) || [null, {name: ''}];
+        return props.drivers.find(
+            (driver) => driver.autoID === id
+        ) || {name: ''};
     }
 
     function createContent(order){
@@ -21,21 +23,34 @@ function HistoryItem(props){
             if(order.status === stat.ORDER_FINISHED) {
                 return (
                     <div>
-                        <div>Водитель: {findDriver(order.autoID)[1].name + '/' + order.autoID}</div>
-                        <div>Дата принятия: {new Date(order.orderAccept).toLocaleString()}</div>
-                        <div>Дата завершения: {new Date(order.orderFinished).toLocaleString()}</div>
-                        <div className="small text-right text-secondary">{order.price} грн</div>
+                        <div className="mb-3">Водитель: {findDriver(order.autoID).name + '/' + order.autoID}</div>
+
+                        <div className="small d-flex justify-content-between">
+                            <div className="text-secondary">{new Date(props.order.orderCreate).toLocaleString()}</div>
+                            <div className="text-secondary">{order.price} грн</div>
+                        </div>
                     </div>
                 );
             }
 
             return (
                 <div>
-                    <div>Водитель: {findDriver(order.autoID)[1].name + '/' + order.autoID}</div>
-                    <div>Дата принятия: {new Date(order.orderAccept).toLocaleString()}</div>
+                    <div className="mb-3">Водитель: {findDriver(order.autoID).name + '/' + order.autoID}</div>
+
+                    <div className="small d-flex justify-content-between">
+                        <div className="text-secondary">{new Date(props.order.orderCreate).toLocaleString()}</div>
+                        <div className="text-secondary"> </div>
+                    </div>
                 </div>
             );
         }
+
+        return (
+            <div className="small d-flex justify-content-between mt-3">
+                <div className="text-secondary">{new Date(props.order.orderCreate).toLocaleString()}</div>
+                <div className="text-secondary"> </div>
+            </div>
+        );
     }
 
     return (
@@ -48,7 +63,6 @@ function HistoryItem(props){
 
                 <div>Откуда: {props.order.start}</div>
                 <div>Куда: {props.order.destination}</div>
-                <div>Создан: {new Date(props.order.orderCreate).toLocaleString()}</div>
 
                 {createContent(props.order)}
             </div>
@@ -56,4 +70,10 @@ function HistoryItem(props){
     );
 }
 
-export default HistoryItem;
+let stateToProps = (state) => {
+    return {
+        drivers: state.drivers.list.val
+    }
+};
+
+export default connect(stateToProps, null)(HistoryItem);
