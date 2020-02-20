@@ -28,6 +28,8 @@ import Animation from './Components/Load/';
 
 import reducer from './Reducers/';
 
+import Test from './Components/Test/';
+
 let store = createStore(reducer, composeWithDevTools(applyMiddleware(thunk)));
 
 ReactDOM.render(
@@ -40,6 +42,7 @@ ReactDOM.render(
                 <Route path = "/history" component = {History}/>
                 <Route path = "/update" component = {ProfileUpdate}/>
                 <Route path = "/drivers" component = {Drivers}/>
+                <Route path = "/t" component = {Test}/>
             </React.Suspense>
         </Router>
         <ToastContainer position={toast.POSITION.BOTTOM_RIGHT}/>

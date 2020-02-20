@@ -3,13 +3,15 @@ import * as stat from 'js/Components/Dashboard/const';
 import firebaseProj from 'js/fareConfig';
 
 //date picker
-
+import { DateRange } from 'react-date-range';
 
 import {connect} from 'react-redux';
 
 class HistoryForm extends React.Component{
     constructor(props){
         super(props);
+
+        this.onPeriodChange = this.onPeriodChange.bind(this);
 
         this.state = {auto: []}
     }
@@ -49,34 +51,20 @@ class HistoryForm extends React.Component{
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="dateStart">Начиная с:</label>
+                        <label htmlFor="datePeriod">Период:</label>
 
                         <input
-                            type="date"
-                            className="form-control mb-3"
-                            placeholder="Date start"
-                            value = {this.props.historyForm.dateStart || ''}
-                            onChange={
-                                (e) => this.props.historyFilterChange(
-                                    creators.historyDateStartChange(e.target.value)
-                                )
+                            type = "text"
+                            className="form-control mb-1"
+                            value = {
+                                new Date(this.props.historyForm.dateStart).toDateString() + '-' + new Date(this.props.historyForm.dateEnd).toDateString()
                             }
                         />
-                    </div>
 
-                    <div className="form-group">
-                        <label htmlFor="dateEnd">Заканчивая до:</label>
-
-                        <input
-                            type="date"
-                            className="form-control mb-3"
-                            placeholder="Date end"
-                            value = {this.props.historyForm.dateEnd || ''}
-                            onChange={
-                                (e) => this.props.historyFilterChange(
-                                    creators.historyDateEndChange(e.target.value)
-                                )
-                            }
+                        <DateRange
+                            className="mb-3"
+                            onChange={this.onPeriodChange}
+                            onInput={this.onPeriodChange}
                         />
                     </div>
 
@@ -105,22 +93,33 @@ class HistoryForm extends React.Component{
                     </div>
 
                     <div className="form-group">
-                        <div className="custom-control custom-switch">
-                            <input
-                                type="checkbox"
-                                className="custom-control-input"
-                                id="sortDir"
-                                onChange={
-                                    (e) =>
-                                        this.props.historyFilterChange(
-                                            creators.historySortDirectionChange(!e.target.checked ? 'ASC' : 'DESC')
-                                        )
-                                }/>
+                    <div className="custom-control custom-switch">
+                        <input
+                            type="checkbox"
+                            className="custom-control-input"
+                            id="sortDir"
+                            checked={this.props.historyForm.sortDir === 'ASC'}
+                            onChange={
+                                (e) =>
+                                    this.props.historyFilterChange(
+                                        creators.historySortDirectionChange(!e.target.checked ? 'ASC' : 'DESC')
+                                    )
+                            }/>
 
-                            <label htmlFor="sortDir" className="custom-control-label">Сортировка по убыванию</label>
-                        </div>
+                        <label htmlFor="sortDir" className="custom-control-label">Сортировка по убыванию</label>
                     </div>
+                </div>
                 </form>
+        );
+    }
+
+    onPeriodChange(range){
+        this.props.historyFilterChange(
+            creators.historyDateStartChange(new Date(range.startDate).toDateString())
+        );
+
+        this.props.historyFilterChange(
+            creators.historyDateEndChange(new Date(range.endDate).toDateString())
         );
     }
 }

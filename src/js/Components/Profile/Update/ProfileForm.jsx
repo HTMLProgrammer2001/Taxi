@@ -38,12 +38,12 @@ class ProfileForm extends React.Component{
 
                     <FormInput
                         onChange = {this.onFormChange}
-                        placeholder = "Введите новое имя"
+                        placeholder = {firebaseProj.auth().currentUser.displayName}
                         name = "userName"
                         type = "text"
                         className = "mt-3"
                         state = {this.state}
-                        value = {this.state.fieldsValue.userName || firebaseProj.auth().currentUser.displayName}
+                        value = {this.state.fieldsValue.userName}
                     />
 
                     <FormInput
@@ -107,22 +107,10 @@ class ProfileForm extends React.Component{
 
         //updateUser
         let user = firebaseProj.auth().currentUser,
-            photoURL = user.photoURL,
             name = this.state.fieldsValue.userName ? this.state.fieldsValue.userName : user.displayName;
 
-        if(this.state.fieldsValue.userPhoto){
-
-            let ref = firebaseProj.storage().ref(
-                '/' + user.uid + this.state.fieldsValue.userPhoto.name.slice(this.state.fieldsValue.userPhoto.name.lastIndexOf('.'))
-            );
-
-            await ref.put(this.state.fieldsValue.userPhoto);
-            photoURL = await ref.getDownloadURL();
-        }
-
         firebaseProj.auth().currentUser.updateProfile({
-            displayName: name,
-            photoURL: photoURL
+            displayName: name
         })
             .then(
                 () => {
@@ -161,13 +149,13 @@ class ProfileForm extends React.Component{
 
         if(
             (fieldName === 'userName' || !fieldName) &&
-            (!this.state.fieldsValue.userName || this.state.fieldsValue.userName.length < 3)
+            (this.state.fieldsValue.userName && this.state.fieldsValue.userName.length < 3)
         )
             errors.userName = 'Минимальная длина имени 3 символа';
 
         if(
             (fieldName === 'userPassword' || !fieldName) &&
-            (!this.state.fieldsValue.userPassword || this.state.fieldsValue.userPassword.length < 8)
+            (this.state.fieldsValue.userPassword && this.state.fieldsValue.userPassword.length < 8)
         )
             errors.userPassword = 'Минимальная длина пароля 8 символов';
 
@@ -176,16 +164,6 @@ class ProfileForm extends React.Component{
             (this.state.fieldsValue.confirmPassword !== this.state.fieldsValue.userPassword)
         )
             errors.confirmPassword = 'Пароли не совпадают';
-
-        //check & convert photo
-        if(!this.state.fieldsValue.userPhoto)
-            return errors;
-
-        if(!this.state.fieldsValue.userPhoto.type.includes('image'))
-            errors.userPhoto = 'Файл должен быть фотографией';
-
-        if(this.state.fieldsValue.userPhoto.size > 5*1024*1024)
-            errors.userPhoto = 'Превышен максимальный размер фото(5Мб)';
 
         return errors;
     }

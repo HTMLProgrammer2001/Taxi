@@ -22,6 +22,7 @@ function DriverForm(props){
               <div className="custom-control custom-switch">
                   <input
                       type="checkbox"
+                      checked={props.driverForm.sortDir === 'ASC'}
                       className="custom-control-input"
                       id="sortDir"
                       onChange = {
